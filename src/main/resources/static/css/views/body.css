@@ -1,0 +1,31 @@
+.container {
+	height: 100%;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+.articulo header {
+	font-weight: bolder;
+	font-size: 17px;
+}
+
+.articulo section {
+	
+}
+
+footer {
+	text-align: center;
+	border: 1px solid #DEDCDC;
+	padding-top: 1vh;
+}
+section.error {
+	position: absolute;
+    top: 26%;
+    z-index: 999999;
+    border: 1px solid gray;
+    padding: 1vw;
+    left: 25%;
+    width: 50%;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0px 0px 18px black;
+}

@@ -1,9 +1,45 @@
-<%@ page pageEncoding="UTF-8"%>
-</div><!-- /.container -->
-          
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="${s}/js/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="${s}/js/bootstrap.min.js"></script>
-  </body>
-</html>
+<%@ page contentType="text/html; charset=UTF-8"%>
+
+<!-- Footer -->
+<footer>
+	
+	<section>		
+			<a href="./nosotros" class="nosotros">Nosotros</a>
+	</section>
+	<div class="row">
+		<div class="col-lg-12">
+			<p>Copyright &copy; TusNoticias 2015</p>
+		</div>
+	</div>
+</footer>
+ 
+<!-- /.container -->
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="${s}/js/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="${s}/js/bootstrap.min.js"></script>
+<!-- jQuery Bootstrap-style Dropdowns http://labs.abeautifulsite.net/jquery-dropdown/ -->
+<script type="text/javascript"
+	src="${s}/js/jquery-dropdown-master/jquery.dropdown.js"></script>
+<!-- jQuery Twbs Pagination http://esimakin.github.io/twbs-pagination/ -->
+<script type="text/javascript"
+	src="${s}/js/esimakin-twbs-pagination-v1.2.5-5-gfbdd6fc-fbdd6fc/jquery.twbsPagination.min.js"></script>
+<!-- jQuery Label_better -->
+<script type="text/javascript"
+	src="${s}/js/jquery-label_better/jquery.label_better.min.js"></script>
+
+<!-- WysiBB BBcode editor -->
+	<script type="text/javascript" src="${s}/js/wysibb/jquery.wysibb.min.js"></script>
+
+<!-- jQuery TusNoticias -->
+<script type="text/javascript" src="${s}/js/tusnoticias.js"></script>
+
+<script type="text/javascript">
+$(".category").click(function() {
+	var tag = $(this).text();
+	$("section.col-md-7").load("${prefix}/articulos/tag/" + tag);
+	$("a.list-group-item.category.active").toggleClass("active");
+	$(this).toggleClass("active");
+});
+</script>

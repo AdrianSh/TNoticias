@@ -1,0 +1,9 @@
+.nosotros {
+    color: #777;
+    text-decoration: none;
+}
+
+.nosotros:focus, .nosotros:hover{
+	
+	color: black;
+}

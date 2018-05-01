@@ -1,0 +1,71 @@
+.resumen-top {
+	margin-bottom: 2vh;
+    border: 1px solid#DDDDDD;
+    border-radius: 3px;
+    padding: 0.3vw;
+}
+.resumen-top header {
+	font-size: 13px;
+	overflow: auto;
+}
+.resumen-top header a {
+	font-size: 13px;
+}
+.resumen-top header span.fecha {
+	font-size: 10px;
+    float: right;
+}
+.resumen-top section {
+	font-size: 12px;
+    max-height: 10vh;
+    text-overflow: ellipsis;
+	overflow: auto;
+}
+.resumen-top footer {
+	font-size: 11px;
+    overflow: auto;
+    padding-top: 0;
+    padding-left: 1vh;
+    padding-right: 1vh;
+    border: 0;
+}
+.resumen-top footer .ranking {
+	float: left;
+    border: 1px solid #D2C880;
+    background: #F0E380;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 5px;
+}
+.resumen-top footer .autor {
+	float: right;
+    font-style: italic;
+}
+.nav-categorias {
+	border: 1px solid #E7E7E7;
+	border-radius: 3px;
+	margin-bottom: 15px;
+	text-align: center;
+}
+
+.nav-cat-header {
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: auto;
+	display: table;
+	content: " ";
+	width: 100%;
+}
+
+.nav-cat-header .navbar-header .lead {
+	margin-top: 14px;
+	margin-bottom: 0px;
+}
+
+#categorias {
+	margin-top: 10px;
+	padding-right: 0px;
+}
+

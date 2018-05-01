@@ -1,0 +1,59 @@
+.articulosASeleccionar {
+	margin-bottom: 12px;
+}
+.articulosASeleccionar .articulo {
+	border: 1px dashed gray;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+.articulo header.opciones {
+	float: right;
+}
+.articulo header.opciones a {
+	color: #929E8F;
+}
+.articulo header span.fecha {
+	float: right;
+    font-size: 12px;
+    color: gray;
+    margin-top: 6px;
+    font-weight: initial;
+    margin-right: 10px;
+}
+.articulo footer {
+	text-align: center;
+    border: none;
+    padding-top: 1vh;
+    overflow: auto;
+    padding-bottom: 0.4vh;
+}
+.articulo footer .ranking {
+	float: left;
+    max-width: 10em;
+    padding: 1px;
+    border: 1px solid #A59100;
+    border-radius: 5px;
+    color: #FFFFFF;
+    font-weight: bolder;
+    padding-left: 4px;
+    padding-right: 4px;
+    background: #E0C600;
+    opacity: .5;
+}
+.articulo footer .autor {
+	min-width: 10em;
+    float: right;
+    font-style: italic;
+    font-size: 13px;
+}
+.separadorDeArticulo {
+	width: 100%;
+    height: 2vh;
+    border-top: 1px solid #DDDDDD;
+    margin-top: 1vh;
+}
+.loadMore {
+	text-align: center;
+	margin-bottom: 1vh;
+	display: none;
+}

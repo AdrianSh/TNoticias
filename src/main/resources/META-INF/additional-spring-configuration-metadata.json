@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "es.ucm.fdi.base-path",
+    "type": "java.lang.String",
+    "description": "A description for 'es.ucm.fdi.base-path'"
+  },
+  {
+    "name": "es.ucm.fdi.tusnoticias.site-url",
+    "type": "java.lang.String",
+    "description": "A description for 'es.ucm.fdi.tusnoticias.site-url'"
+  }
+]}

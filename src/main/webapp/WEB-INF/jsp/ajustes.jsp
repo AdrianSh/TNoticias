@@ -4,31 +4,34 @@
 	<div class="row">
 		<section class="col-md-12">
 			<div class="row">
-			<form action="${prefix}/ajustes" enctype="multipart/form-data" role="form" class="form-register" method="POST">
+				<form action="${siteUrl}/ajustes" enctype="multipart/form-data"
+					role="form" class="form-register" method="POST">
+					<input type="hidden" name="${_csrf.parameterName}"
+						value="${_csrf.token}" />
 					<div class="text-center">
-					<h2>
-						Ajustes Usuario 
-					</h2>
-	</div>
+						<h2>Ajustes Usuario</h2>
+					</div>
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 							<div class="form-group">
-								<input type="file" name="avatar" id="avatar" 
-									class="form-control input-lg label_better" placeholder="Ruta" tabindex="1">
-					
+								<input type="file" name="avatar" id="avatar"
+									class="form-control input-lg label_better" placeholder="Ruta"
+									tabindex="1">
+
 							</div>
 						</div>
 					</div>
-				 	<div class="form-group">
+					<div class="form-group">
 						<input type="email" name="email" id="email"
-							class="form-control input-lg label_better" placeholder="${email}" tabindex="2">
+							class="form-control input-lg label_better" placeholder="${email}"
+							tabindex="2">
 					</div>
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 							<div class="form-group">
-								<input type="password" name="pass" id="password" 
-									class="form-control input-lg label_better" placeholder="Contraseña"
-									tabindex="3">
+								<input type="password" name="pass" id="password"
+									class="form-control input-lg label_better"
+									placeholder="Contraseña" tabindex="3">
 							</div>
 						</div>
 					</div>

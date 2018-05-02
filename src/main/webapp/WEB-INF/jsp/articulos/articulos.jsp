@@ -7,25 +7,25 @@
 			<c:forEach items="${lastarticulos}" var="articulo">
 				<article class="articulo">
 					<header>
-						<a href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}">${e:forHtmlContent(articulo.titulo)}</a><span
+						<a href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}">${e:forHtmlContent(articulo.titulo)}</a><span
 							class="fecha">${e:forHtmlContent(articulo.fecha)}</span>
 					</header>
 					<c:if test="${not empty user}">
 					<header class="opciones">
 						<a
-							href="${prefix}/articulo/borrar/${e:forHtmlContent(articulo.id)}">
+							href="${siteUrl}/articulo/borrar/${e:forHtmlContent(articulo.id)}">
 							<span class="glyphicon glyphicon-remove"></span>
 						</a>
 						<c:choose>
 							<c:when test="${user.favoritos.contains(articulo)}">
 								<a style="color: red;"
-									href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+									href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
 									<span class="glyphicon glyphicon-heart"></span>
 								</a>
 							</c:when>
 							<c:otherwise>
 								<a
-									href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+									href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
 									<span class="glyphicon glyphicon-heart"></span>
 								</a>
 							</c:otherwise>

@@ -6,7 +6,7 @@
 			<section class="col-md-7">
 				<article class="articulo">
 					<header>${e:forHtmlContent(mMensaje)}</header>
-					<section>Si ya estás registrado <a href="/tusnoticias/inicio_sesion">inicia sesión</a>, si no <a href="/tusnoticias/registro">regístrate</a>!</section>
+					<section>Si ya estás registrado <a href="${siteUrl}/inicio_sesion">inicia sesión</a>, si no <a href="${siteUrl}/registro">regístrate</a>!</section>
 				</article>
 			</section>
 		<%@ include file="../jspf/column-right.jspf"%>

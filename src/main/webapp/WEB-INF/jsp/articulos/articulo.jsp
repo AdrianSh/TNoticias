@@ -16,20 +16,20 @@
 								<c:choose>
 									<c:when test="${articulo.autor == user}">
 										<a
-											href="${prefix}/articulo/borrar/${e:forHtmlContent(articulo.id)}">
+											href="${siteUrl}/articulo/borrar/${e:forHtmlContent(articulo.id)}">
 											<span class="glyphicon glyphicon-remove"></span>
 										</a>
 
 										<c:choose>
 											<c:when test="${user.favoritos.contains(articulo)}">
 												<a style="color: red;"
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
 													<span class="glyphicon glyphicon-heart"></span>
 												</a>
 											</c:when>
 											<c:otherwise>
 												<a
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
 													<span class="glyphicon glyphicon-heart"></span>
 												</a>
 											</c:otherwise>
@@ -38,13 +38,13 @@
 										<c:choose>
 											<c:when test="${not empty puntuacionP}">
 												<a style="color: blue;"
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/puntuarP">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/puntuarP">
 													<span class="glyphicon glyphicon-thumbs-up"></span>
 												</a>
 											</c:when>
 											<c:otherwise>
 												<a
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/puntuarP">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/puntuarP">
 													<span class="glyphicon glyphicon-thumbs-up"></span>
 												</a>
 											</c:otherwise>
@@ -53,13 +53,13 @@
 										<c:choose>
 											<c:when test="${not empty puntuacionN}">
 												<a style="color: blue;"
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/puntuarN">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/puntuarN">
 													<span class="glyphicon glyphicon-thumbs-down"></span>
 												</a>
 											</c:when>
 											<c:otherwise>
 												<a
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/puntuarN">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/puntuarN">
 													<span class="glyphicon glyphicon-thumbs-down"></span>
 												</a>
 											</c:otherwise>
@@ -81,23 +81,23 @@
 										<c:choose>
 											<c:when test="${user.favoritos.contains(articulo)}">
 												<a style="color: red;"
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
 													<span class="glyphicon glyphicon-heart"></span>
 												</a>
 											</c:when>
 											<c:otherwise>
 												<a
-													href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+													href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
 													<span class="glyphicon glyphicon-heart"></span>
 												</a>
 											</c:otherwise>
 										</c:choose>
 										<a
-											href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/puntuarP">
+											href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/puntuarP">
 											<span class="glyphicon glyphicon-thumbs-up"></span>
 										</a>
 										<a
-											href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}/puntuarN">
+											href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/puntuarN">
 											<span class="glyphicon glyphicon-thumbs-down"></span>
 										</a>
 									</c:otherwise>
@@ -119,7 +119,7 @@
 								<div class="col-sm-2 right">
 									<div class="thumbnail">
 										<img class="img-responsive user-photo"
-											src="${prefix}/user/${coment.user.id}/photo">
+											src="${siteUrl}/user/${coment.user.id}/photo">
 									</div>
 									<!-- /thumbnail -->
 								</div>
@@ -136,14 +136,18 @@
 										<div class="vote">
 											<section class="puntuacionc">
 												<span class="text-puntuar">Puntuar:</span>
-												<form method="post" action="${prefix}/comentario/puntuarP">
-													<input type="submit" class="voto_positivo" title="Positivo">
-													<input type="hidden" value="${e:forHtmlContent(coment.id)}"
+												<form method="post" action="${siteUrl}/comentario/puntuarP">
+													<input type="hidden" name="${_csrf.parameterName}"
+														value="${_csrf.token}" /> <input type="submit"
+														class="voto_positivo" title="Positivo"> <input
+														type="hidden" value="${e:forHtmlContent(coment.id)}"
 														name="id">
 												</form>
-												<form method="post" action="${prefix}/comentario/puntuarN">
-													<input type="submit" class="voto_negativo" title="Negativo">
-													<input type="hidden" value="${e:forHtmlContent(coment.id)}"
+												<form method="post" action="${siteUrl}/comentario/puntuarN">
+													<input type="hidden" name="${_csrf.parameterName}"
+														value="${_csrf.token}" /> <input type="submit"
+														class="voto_negativo" title="Negativo"> <input
+														type="hidden" value="${e:forHtmlContent(coment.id)}"
 														name="id">
 												</form>
 											</section>
@@ -160,9 +164,10 @@
 									<div id="oculto${coment.id}" class="row" style="display: none">
 										<div class="col-sm-8 left">
 											<div class="panel panel-default">
-												<form method="post" action="${prefix}/comentario/responder"
+												<form method="post" action="${siteUrl}/comentario/responder"
 													class="comment-form">
-													<input type="hidden"
+													<input type="hidden" name="${_csrf.parameterName}"
+														value="${_csrf.token}" /> <input type="hidden"
 														value="${e:forHtmlContent(articulo.id)}" name="articulo">
 													<input type="hidden" value="${e:forHtmlContent(coment.id)}"
 														name="comentario original">
@@ -180,7 +185,7 @@
 										<div class="col-sm-2 right">
 											<div class="thumbnail">
 												<img class="img-responsive user-photo"
-													src="${prefix}/user/${respuesta.user.id}/photo">
+													src="${siteUrl}/user/${respuesta.user.id}/photo">
 											</div>
 											<!-- /thumbnail -->
 										</div>
@@ -197,15 +202,19 @@
 												<!-- /panel-body -->
 												<div class="vote">
 													<span class="text-puntuar">Puntuar:</span>
-													<form method="post" action="${prefix}/comentario/puntuarP">
-														<input type="submit" class="voto_positivo"
-															title="Positivo"> <input type="hidden"
-															value="${e:forHtmlContent(respuesta.id)}" name="id">
+													<form method="post" action="${siteUrl}/comentario/puntuarP">
+														<input type="hidden" name="${_csrf.parameterName}"
+															value="${_csrf.token}" /> <input type="submit"
+															class="voto_positivo" title="Positivo"> <input
+															type="hidden" value="${e:forHtmlContent(respuesta.id)}"
+															name="id">
 													</form>
-													<form method="post" action="${prefix}/comentario/puntuarN">
-														<input type="submit" class="voto_negativo"
-															title="Negativo"> <input type="hidden"
-															value="${e:forHtmlContent(respuesta.id)}" name="id">
+													<form method="post" action="${siteUrl}/comentario/puntuarN">
+														<input type="hidden" name="${_csrf.parameterName}"
+															value="${_csrf.token}" /> <input type="submit"
+															class="voto_negativo" title="Negativo"> <input
+															type="hidden" value="${e:forHtmlContent(respuesta.id)}"
+															name="id">
 													</form>
 													<div class="puntuacionRealR">${e:forHtmlContent(puntosCom)}</div>
 												</div>
@@ -220,8 +229,9 @@
 										<div id="ocultoRes" class="row" style="display: none">
 											<div class="col-sm-8 left">
 												<div class="panel panel-default">
-													<form method="post" action="${prefix}/comentario/responder"
+													<form method="post" action="${siteUrl}/comentario/responder"
 														class="comment-form">
+														<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 														<input type="hidden" value="${articulo.id}"
 															name="articulo"> <input type="hidden"
 															value="${respuesta.id}" name="comentario original">
@@ -247,10 +257,11 @@
 
 							<div class="col-sm-8 left">
 								<div class="panel panel-default">
-									<form method="post" action="${prefix}/comentario/anadir"
+									<form method="post" action="${siteUrl}/comentario/anadir"
 										class="comment-form">
-										<input type="hidden" value="${e:forHtmlContent(articulo.id)}"
-											name="id">
+										<input type="hidden" name="${_csrf.parameterName}"
+											value="${_csrf.token}" /> <input type="hidden"
+											value="${e:forHtmlContent(articulo.id)}" name="id">
 										<textarea name="comment" class="panel-body"></textarea>
 										<input type="submit" value="Comentar" class="btn btn-default">
 									</form>

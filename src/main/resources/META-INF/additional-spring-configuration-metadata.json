@@ -8,5 +8,15 @@
     "name": "es.ucm.fdi.tusnoticias.site-url",
     "type": "java.lang.String",
     "description": "A description for 'es.ucm.fdi.tusnoticias.site-url'"
+  },
+  {
+    "name": "es.ucm.fdi.tusnoticias.site-name",
+    "type": "java.lang.String",
+    "description": "A description for 'es.ucm.fdi.tusnoticias.site-name'"
+  },
+  {
+    "name": "es.ucm.fdi.tusnoticias.short-site-name",
+    "type": "java.lang.String",
+    "description": "A description for 'es.ucm.fdi.tusnoticias.short-site-name'"
   }
 ]}

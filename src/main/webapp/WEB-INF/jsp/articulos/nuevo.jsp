@@ -8,9 +8,11 @@
 				<header>Articulo Nuevo</header>
 				<section>
 
-					<form method="post" action="${prefix}/articulo/nuevo/articulos">
+					<form method="post" action="${siteUrl}/articulo/nuevo/articulos">
+						<input type="hidden" name="${_csrf.parameterName}"
+							value="${_csrf.token}" />
 						<div class="col-md-10">
-							
+
 							<div class="form-group">
 								<button type="submit" class="btn btn-default">Cargar</button>
 								</label>
@@ -30,7 +32,9 @@
 						</c:forEach>
 					</section>
 
-					<form method="post" action="${prefix}/articulo/nuevo/publicar">
+					<form method="post" action="${siteUrl}/articulo/nuevo/publicar">
+						<input type="hidden" name="${_csrf.parameterName}"
+							value="${_csrf.token}" />
 						<div class="col-md-10">
 							<div class="alert alert-info">
 								<a href="#" class="close" data-dismiss="alert"

@@ -11,12 +11,12 @@
 					<!-- http://lorempixel.com/850/280/people/9/ -->
 				</div>
 				<div class="useravatar">
-					<img alt="" src="${prefix}/user/${user.id}/photo">
+					<img alt="" src="${siteUrl}/user/${user.id}/photo">
 				</div>
 				<div class="card-info">
 					<span class="card-title">${e:forHtmlContent(userp.name)} ${e:forHtmlContent(userp.lname)}</span>
 					<c:if test="${amistad}">
-						<a href="${prefix}/perfil/${e:forHtmlContent(userp.id)}/add">Añadir como Amigo</a>
+						<a href="${siteUrl}/perfil/${e:forHtmlContent(userp.id)}/add">Añadir como Amigo</a>
 					</c:if>
 				</div>
 			</div>

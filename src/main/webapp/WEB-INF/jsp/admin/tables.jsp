@@ -36,7 +36,7 @@
 										<tr class="odd gradeX">
 											<td>${e:forHtmlContent(a.id)}</td>
 											<td>${e:forHtmlContent(a.login)}</td>
-											<td>${e:forHtmlContent(a.role)}</td>
+											<td>${e:forHtmlContent(a.roles)}</td>
 											<td>${e:forHtmlContent(a.name)}</td>
 											<td>${e:forHtmlContent(a.lname)}</td>
 											<td>${e:forHtmlContent(a.email)}</td>
@@ -77,7 +77,7 @@
 											<td>${e:forHtmlContent(a.id)}</td>
 											<td>${e:forHtmlContent(a.comment)}</td>
 											<td>${e:forHtmlContent(a.owner.name)}</td>
-											<td>	${e:forHtmlContent(a.owner.lname)}</td>
+											<td>${e:forHtmlContent(a.owner.lname)}</td>
 											<td>${e:forHtmlContent(a.articulo.titulo)}</td>
 										</tr>
 									</c:forEach>
@@ -158,12 +158,16 @@
 							</table>
 						</div>
 						<!-- /.table-responsive -->
-						<form method="post" action="${prefix}/admin/tables/addPeriodico">
+						<form method="post" action="${siteUrl}/admin/tables/addPeriodico">
+							<input type="hidden" name="${_csrf.parameterName}"
+								value="${_csrf.token}" />
 							<div class="form-group">
-								<label>Nombre:</label> <input class="form-control" name="periodico">
+								<label>Nombre:</label> <input class="form-control"
+									name="periodico">
 							</div>
 							<div class="form-group">
-								<label>Url:</label> <input type="url" class="form-control" name="url">
+								<label>Url:</label> <input type="url" class="form-control"
+									name="url">
 							</div>
 							<div class="form-group">
 								<input class="form-control" type="submit" value="Agregar">
@@ -201,7 +205,9 @@
 							</table>
 						</div>
 						<!-- /.table-responsive -->
-						<form method="post" action="${prefix}/admin/tables/addTag">
+						<form method="post" action="${siteUrl}/admin/tables/addTag">
+							<input type="hidden" name="${_csrf.parameterName}"
+								value="${_csrf.token}" />
 							<div class="form-group">
 								<label>Tag:</label> <input class="form-control" name="tag">
 							</div>

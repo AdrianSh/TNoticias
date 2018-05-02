@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.*;
-
 
 @Controller
 public class ComentController {
@@ -37,115 +37,107 @@ public class ComentController {
 
 	/**
 	 * Añadir comentario
-	 * @param model 
+	 * 
+	 * @param model
 	 */
 	@RequestMapping(value = "/comentario/anadir", params = { "comment", "id" }, method = RequestMethod.POST)
 	@Transactional
 	public String anadirComentario(@RequestParam("comment") String comment, @RequestParam("id") long idArt,
-			HttpSession session, Model model) {
+			Model model) {
 		String returnn = "redirect:/noregistro/";
-		try {
-			if (comment != "") {
-				Articulo art = entityManager.find(Articulo.class, idArt);
-				if (art != null) {
-					User u = (User) session.getAttribute("user");
-					u = entityManager.find(User.class, u.getId());
-					Comentario com = new Comentario();
-					com.setPuntuacionesId(new ArrayList<Integer>());
-					
-					com.setRespuestas(new ArrayList<Comentario>());
-					com.setUser(u);
-					com.setComment(Encode.forHtmlContent(comment));
-					com.setResponde(null);
-					com.setFecha(new Date());
+		if (comment != "") {
+			Articulo art = entityManager.find(Articulo.class, idArt);
+			UserDetails uds = UserController.getInstance().getPrincipal();
+			if (art == null)
+				returnn = "redirect:/home#error-Articulo-no-encontrado";
+			else if (uds != null) {
+				User u = uds.getUser();
+				Comentario com = new Comentario();
+				com.setPuntuacionesId(new ArrayList<Integer>());
+				com.setRespuestas(new ArrayList<Comentario>());
+				com.setUser(u);
+				com.setComment(Encode.forHtmlContent(comment));
+				com.setResponde(null);
+				com.setFecha(new Date());
 
-					Set<Comentario> listaC = art.getComentario();
-					listaC.add(com);
-					art.setComentario(listaC);
-					com.setArticulo(art);
-					//model.addAttribute("puntosCom", sumaPuntuaciones(com));
-					entityManager.persist(art);
-					entityManager.persist(com);
+				Set<Comentario> listaC = art.getComentario();
+				listaC.add(com);
+				art.setComentario(listaC);
+				com.setArticulo(art);
+				// model.addAttribute("puntosCom", sumaPuntuaciones(com));
+				entityManager.persist(art);
+				entityManager.persist(com);
+				logger.info("Comment " + com.getId() + " written in " + com.getArticulo().getTitulo() + " written by "
+						+ com.getUser().getLogin());
 
-					entityManager.flush();
-					logger.info("Comment " + com.getId() + " written in " + com.getArticulo().getTitulo()
-							+ " written by " + com.getUser().getLogin());
-
-					returnn = "redirect:/articulo/" + idArt;
-				} else {
-					returnn = "redirect:/home#error-Articulo-no-encontrado";
-				}
+				returnn = "redirect:/articulo/" + idArt;
+			} else {
+				returnn = "redirect:/home?loginRequired";
 			}
-		} catch (NullPointerException e) {
-e.printStackTrace();
 		}
 		return returnn;
 	}
 
 	/**
 	 * Puntuar comentario positivo
-	 * @param model 
+	 * 
+	 * @param model
 	 */
 
 	@RequestMapping(value = "/comentario/puntuarP", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
-	public String puntuarComentarioPositivo(@RequestParam("id") long id, HttpSession session, Model model) {
-		try{	
-			User u = (User) session.getAttribute("user");
-			u = entityManager.find(User.class, u.getId());
+	public String puntuarComentarioPositivo(@RequestParam("id") long id, Model model) {
+		UserDetails uds = UserController.getInstance().getPrincipal();
+		if (uds != null) {
+			User u = uds.getUser();
 			Comentario com = entityManager.find(Comentario.class, id);
-			Puntuacion p = new Puntuacion(1, 0);		
+			Puntuacion p = new Puntuacion(1, 0);
 			p.setUsuario(u.getId());
-			entityManager.persist(p);
-			entityManager.flush();
 			u.getPuntuacionesHechasId().add((Integer) (int) p.getId());
 			com.getPuntuacionesId().add((Integer) (int) p.getId());
 			com.getUser().getPuntuacionesId().add((Integer) (int) p.getId());
-			
-			entityManager.merge(p);
-			entityManager.merge(u);
-			entityManager.merge(com);
-			entityManager.flush();
+
+			entityManager.persist(p);
+			entityManager.persist(u);
+			entityManager.persist(com);
 			model.addAttribute("puntosCom", sumaPuntuaciones(com));
 			logger.info("Comentario " + com.getId() + " puntuado positivo");
 			return "redirect:/articulo/" + com.getArticulo().getId();
-		}
-		catch(NullPointerException e){
-			return "redirect:/noregistro/";		
+		} else {
+			return "redirect:/noregistro/";
 		}
 
 	}
 
 	/**
 	 * Puntuar comentario negativo
-	 * @param model 
+	 * 
+	 * @param model
 	 */
 
 	@RequestMapping(value = "/comentario/puntuarN", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
-	public String puntuarComentarioNegativo(@RequestParam("id") long id, HttpSession session, Model model) {
-		try {
-			User u = (User) session.getAttribute("user");
+	public String puntuarComentarioNegativo(@RequestParam("id") long id, Model model) {
+		UserDetails uds = UserController.getInstance().getPrincipal();
+		if (uds != null) {
+			User u = uds.getUser();
 			u = entityManager.find(User.class, u.getId());
 			Comentario com = entityManager.find(Comentario.class, id);
-			Puntuacion p = new Puntuacion(0, 1);		
+			Puntuacion p = new Puntuacion(0, 1);
 			p.setUsuario(u.getId());
-			entityManager.persist(p);
-			entityManager.flush();
 			u.getPuntuacionesHechasId().add((Integer) (int) p.getId());
 			com.getPuntuacionesId().add((Integer) (int) p.getId());
 			com.getUser().getPuntuacionesId().add((Integer) (int) p.getId());
-			
-			entityManager.merge(p);
-			entityManager.merge(u);
-			entityManager.merge(com);
-			entityManager.flush();
-			
+
+			entityManager.persist(p);
+			entityManager.persist(u);
+			entityManager.persist(com);
+
 			model.addAttribute("puntosCom", sumaPuntuaciones(com));
 			logger.info("Articulo " + com.getId() + " puntuado negativo");
 
 			return "redirect:articulo/" + com.getArticulo().getId();
-		} catch (NullPointerException e) {
+		} else {
 			return "redirect:/noregistro/";
 		}
 	}
@@ -159,41 +151,33 @@ e.printStackTrace();
 	@Transactional
 	public String responderComentario(@RequestParam("comment") String comment,
 			@RequestParam("articulo") long articuloId, Model model,
-			@RequestParam("comentario original") long comentarioOrgId, HttpSession session) {
-		try {
-			if (comment != "") {
-				User u = (User) session.getAttribute("user");
-				u = entityManager.find(User.class, u.getId());
+			@RequestParam("comentario original") long comentarioOrgId) {
+		UserDetails uds = UserController.getInstance().getPrincipal();
 
-				Comentario com = new Comentario();
-				Comentario org = entityManager.find(Comentario.class, comentarioOrgId);
+		if (comment.length() > 0 && uds != null) {
+			User u = uds.getUser();
 
-				com.setPuntuacionesId(new ArrayList<Integer>());
-				com.setRespuestas(new ArrayList<Comentario>());
-				com.setUser(u);
-				com.setComment(Encode.forHtmlContent(comment));
-				com.setResponde(org);
-				com.setFecha(new Date());
+			Comentario com = new Comentario();
+			Comentario org = entityManager.find(Comentario.class, comentarioOrgId);
 
-				Articulo art = entityManager.find(Articulo.class, articuloId);
+			com.setPuntuacionesId(new ArrayList<Integer>());
+			com.setRespuestas(new ArrayList<Comentario>());
+			com.setUser(u);
+			com.setComment(Encode.forHtmlContent(comment));
+			com.setResponde(org);
+			com.setFecha(new Date());
 
-				// com.setArticulo(art);
+			Articulo art = entityManager.find(Articulo.class, articuloId);
 
-				org.anadirRespuesta(com);
+			org.anadirRespuesta(com);
 
-				entityManager.persist(com);
-				// entityManager.persist(art);
-				entityManager.persist(org);
+			entityManager.persist(com);
+			entityManager.persist(org);
 
-				entityManager.flush();
-				logger.info(
-						"Comment " + com.getComment() + " written in " + art.getTitulo() + " written by " + u.getId());
-			}
-
-			return "redirect:/articulo/" + articuloId;
-		} catch (NullPointerException e) {
-			return "redirect:/noregistro/";
+			logger.info("Comment " + com.getComment() + " written in " + art.getTitulo() + " written by " + u.getId());
 		}
+
+		return "redirect:/articulo/" + articuloId;
 	}
 
 	/**
@@ -203,8 +187,9 @@ e.printStackTrace();
 	@Transactional
 	@ResponseBody
 	public String borrarComentario(@PathVariable("id") long id, HttpServletResponse response, Model model) {
-		try {
-			Comentario c = entityManager.find(Comentario.class, id);
+		UserDetails uds = UserController.getInstance().getPrincipal();
+		Comentario c = entityManager.find(Comentario.class, id);
+		if(uds != null && (c.getUser().equals(uds.getUser()) || uds.isAdmin())) {
 			for (Comentario com : c.getRespuestas()) {
 				entityManager.remove(com);
 			}
@@ -222,31 +207,31 @@ e.printStackTrace();
 			entityManager.remove(c);
 			response.setStatus(HttpServletResponse.SC_OK);
 			return "OK";
-		} catch (NoResultException nre) {
-			logger.error("No existe tal comentario: {}", id, nre);
+		} else {
+			logger.error("No existe tal comentario: {}", id);
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			return "ERR";
 		}
 	}
-	
+
 	int sumaPuntuaciones(Comentario com) {
 
 		Iterator<Integer> itera = com.getPuntuacionesId().iterator();
 		int total = 0;
-		logger.info("ID COMENZ  "+ com.getId());
+		logger.info("ID COMENZ  " + com.getId());
 		while (itera.hasNext()) {
 			Integer control = itera.next();
 			Number num = control;
 			Long control2 = num.longValue();
-			logger.info("ESTE ES EL ID A MIRAR  "+ control2);
-			Puntuacion pun =  entityManager.find(Puntuacion.class, control2);
-			logger.info("PUNTUACION CORRESPONDIENTE ID  "+ pun.getId());
-			int suma = pun.getPositivos()- pun.getNegativos();
-			
-		 	total = total + suma;
-		 	
+			logger.info("ESTE ES EL ID A MIRAR  " + control2);
+			Puntuacion pun = entityManager.find(Puntuacion.class, control2);
+			logger.info("PUNTUACION CORRESPONDIENTE ID  " + pun.getId());
+			int suma = pun.getPositivos() - pun.getNegativos();
+
+			total = total + suma;
+
 		}
-		logger.info("TOTAL   "+total);
+		logger.info("TOTAL   " + total);
 		return total;
 	}
 }

@@ -28,7 +28,9 @@
 		</section>
 		<c:if test="${user}">
 			<span onclick="changeseleccionActiva()">Seleccionar parrafo</span>
-			<form method="post" action="${prefix}/articulo/nuevo/publicar">
+			<form method="post" action="${siteUrl}/articulo/nuevo/publicar">
+				<input type="hidden" name="${_csrf.parameterName}"
+					value="${_csrf.token}" />
 				<div class="col-md-10">
 					<textarea class="seleccion form-control" name="articulo" rows="8"></textarea>
 					<input class="form-control" type="text" name="tags"

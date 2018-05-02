@@ -34,10 +34,12 @@
 	<section>
 		<div class="estado">
 			<div class="panel panel-default">
-				<div class="col-xs-10 col-sm-10 panel-heading">
-					Nuevo Comentario
-				</div>
-				<form class="col-xs-10 col-sm-10 panel-body" method="post" action="${prefix}/user/${e:forHtmlContent(userp.id)}/addComment">
+				<div class="col-xs-10 col-sm-10 panel-heading">Nuevo
+					Comentario</div>
+				<form class="col-xs-10 col-sm-10 panel-body" method="post"
+					action="${siteUrl}/user/${e:forHtmlContent(userp.id)}/addComment">
+					<input type="hidden" name="${_csrf.parameterName}"
+						value="${_csrf.token}" />
 					<textarea name="comment"></textarea>
 					<input type="submit" value="Comentar" class="btn">
 				</form>

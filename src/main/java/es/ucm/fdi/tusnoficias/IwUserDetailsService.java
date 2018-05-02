@@ -1,26 +1,35 @@
 package es.ucm.fdi.tusnoficias;
 
-import java.util.ArrayList;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.apache.log4j.Logger;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import es.ucm.fdi.iw.model.User;
+import es.ucm.fdi.tusnoficias.controller.UserController;
+import es.ucm.fdi.tusnoficias.model.User;
 
 public class IwUserDetailsService implements UserDetailsService {
 
 	private static Logger log = Logger.getLogger(IwUserDetailsService.class);
-
     private EntityManager entityManager;
+    private static IwUserDetailsService instance;
+    
+    @Autowired
+	public IwUserDetailsService() {
+    	IwUserDetailsService.instance = this;
+	}
+    
+    public static IwUserDetailsService getInstance() {
+    	return IwUserDetailsService.instance;
+    }
     
     @PersistenceContext
     public void setEntityManager(EntityManager em){
-        this.entityManager = em;
+        entityManager = em;
     }
 
     public UserDetails loadUserByUsername(String username){
@@ -28,17 +37,11 @@ public class IwUserDetailsService implements UserDetailsService {
 	        User u = entityManager.createQuery("from User where login = :login", User.class)
 	                            .setParameter("login", username)
 	                            .getSingleResult();
-	        // build UserDetails object
-	        ArrayList<SimpleGrantedAuthority> roles = new ArrayList<>();
-	        for (String r : u.getRoles().split("[,]")) {
-	        	roles.add(new SimpleGrantedAuthority("ROLE_" + r));
-		        log.info("Roles for " + username + " include " + roles.get(roles.size()-1));
-	        }
-	        return new org.springframework.security.core.userdetails.User(
-	        		u.getLogin(), u.getPassword(), roles); 
+	        
+	        return new es.ucm.fdi.tusnoficias.UserDetails(u);
 	    } catch (Exception e) {
     		log.info("No such user: " + username);
-    		return null;
+    		throw new UsernameNotFoundException(username, e);
     	}
     }
 }

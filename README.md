@@ -1,3 +1,31 @@
+# Spring Security
+Para obtener un User de un controlador, es decir, de un código, tenemos el contraste Anónimo vs. Usuario después de su método a invocar:
+
+## getAuthentication:
+SecurityContextHolder.getContext().getAuthentication()
+-	org.springframework.security.authentication.AnonymousAuthenticationToken
+-	org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+
+## getPrincipal:
+SecurityContextHolder.getContext().getAuthentication().getPrincipal()
+-	es.ucm.fdi.tusnoficias.UserDetails <- Devuelto por el UserDetailsService.loadUserByUsername()
+-	anonymousUser
+
+## getAuthorities:
+SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+-	ROLE_ANONYMOUS
+-	ROLE_user, ROLE_admin  <- Roles definidos
+
+## isAuthenticated:
+SecurityContextHolder.getContext().getAuthentication().isAuthenticated()
+-	true <- Note que en ambos casos devuelve true
+-	true 
+
+## getAuthentication:
+SecurityContextHolder.getContext().getAuthentication()
+-	org.springframework.security.authentication.AnonymousAuthenticationToken@6faeba70: Principal: anonymousUser; Credentials: [PROTECTED]; Authenticated: true; Details: org.springframework.security.web.authentication.WebAuthenticationDetails@fffbcba8: RemoteIpAddress: 0:0:0:0:0:0:0:1; SessionId: 9A9E509BE0C61021622C5816F9A73B27; Granted Authorities: ROLE_ANONYMOUS
+-	org.springframework.security.authentication.UsernamePasswordAuthenticationToken@7a257c08: Principal: es.ucm.fdi.tusnoficias.UserDetails@fd63d6; Credentials: [PROTECTED]; Authenticated: true; Details: org.springframework.security.web.authentication.WebAuthenticationDetails@fffbcba8: RemoteIpAddress: 0:0:0:0:0:0:0:1; SessionId: 9A9E509BE0C61021622C5816F9A73B27; Granted Authorities: ROLE_user, ROLE_admin
+		
 # iw-base
 
 Proyecto base para [IW 2017-18](https://cv4.ucm.es/moodle/course/view.php?id=96754)

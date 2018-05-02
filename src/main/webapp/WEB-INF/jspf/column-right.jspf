@@ -9,7 +9,7 @@
 		<c:forEach items="${rightArticulos}" var="articulo">
 			<section class="resumen-top">
 				<header>
-					<a href="${prefix}/articulo/${e:forHtmlContent(articulo.id)}">${e:forHtmlContent(articulo.titulo)}</a><span
+					<a href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}">${e:forHtmlContent(articulo.titulo)}</a><span
 						class="fecha">${e:forHtmlContent(articulo.fecha)}</span>
 				</header>
 				<section>

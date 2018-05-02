@@ -38,7 +38,7 @@
 <script type="text/javascript">
 $(".category").click(function() {
 	var tag = $(this).text();
-	$("section.col-md-7").load("${prefix}/articulos/tag/" + tag);
+	$("section.col-md-7").load("${siteUrl}/articulos/tag/" + tag);
 	$("a.list-group-item.category.active").toggleClass("active");
 	$(this).toggleClass("active");
 });

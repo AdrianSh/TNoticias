@@ -11,7 +11,7 @@
 					<!-- http://lorempixel.com/850/280/people/9/ -->
 				</div>
 				<div class="useravatar">
-					<img alt="" src="${prefix}/user/${user.id}/photo">
+					<img alt="" src="${siteUrl}/user/${user.id}/photo">
 				</div>
 				<div class="card-info">
 					<span class="card-title">${e:forHtmlContent(user.name)} ${e:forHtmlContent(user.lname)}</span>

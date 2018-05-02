@@ -18,7 +18,7 @@
 					<div class="panel-body">
 						<div class="row">
 							<div class="col-lg-6">
-								<form role="form" action="${prefix}/admin/forms" method="post">
+								<form role="form" action="${siteUrl}/admin/forms" method="post">
 									<div class="form-group">
 										<label>Periodico</label> <select name="periodico"
 											class="form-control">
@@ -48,6 +48,8 @@
 									<button type="submit" class="btn btn-default">Cargar
 										Articulo</button>
 									<button type="reset" class="btn btn-default">Borrar</button>
+									<input type="hidden" name="${_csrf.parameterName}"
+										value="${_csrf.token}" />
 								</form>
 							</div>
 						</div>
@@ -98,8 +100,10 @@
 					</div>
 				</c:if>
 
-				<form role="form" action="${prefix}/admin/forms/publicar"
+				<form role="form" action="${siteUrl}/admin/forms/publicar"
 					method="post">
+					<input type="hidden" name="${_csrf.parameterName}"
+						value="${_csrf.token}" />
 					<div class="alert alert-info">
 						<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Info!</strong>
 						Cuando selecciones un parrafo, recuerda tener "[BBCODE]" activado.
@@ -147,6 +151,7 @@
 								<div class="row">
 									<div class="col-lg-6">
 										<form role="form">
+										<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 											<div class="form-group">
 												<label>Text Input</label> <input class="form-control">
 												<p class="help-block">Example block-level help text here.</p>
@@ -253,6 +258,7 @@
 									<div class="col-lg-6">
 										<h1>Disabled Form States</h1>
 										<form role="form">
+										<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 											<fieldset disabled>
 												<div class="form-group">
 													<label for="disabledSelect">Disabled input</label> <input
@@ -276,6 +282,7 @@
 										</form>
 										<h1>Form Validation States</h1>
 										<form role="form">
+										<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 											<div class="form-group has-success">
 												<label class="control-label" for="inputSuccess">Input
 													with success</label> <input type="text" class="form-control"
@@ -294,6 +301,7 @@
 										</form>
 										<h1>Input Groups</h1>
 										<form role="form">
+										<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
 											<div class="form-group input-group">
 												<span class="input-group-addon">@</span> <input type="text"
 													class="form-control" placeholder="Username">

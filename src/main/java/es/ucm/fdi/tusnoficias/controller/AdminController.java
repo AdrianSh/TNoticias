@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +43,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import es.ucm.fdi.tusnoticias.extra.ArticleRipper;
 import es.ucm.fdi.tusnoficias.LocalData;
+import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.*;
 
 @Controller
@@ -50,36 +52,36 @@ public class AdminController {
 
 	@Autowired
 	private LocalData localData;
-	
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
 	@Autowired
 	private Environment env;
-	
+
 	@ModelAttribute
-    public void addAttributes(Model model, Locale locale) {
-        model.addAttribute("s", "/static");
-		model.addAttribute("prefix", env.getProperty("es.ucm.fdi.tusnoticias.site-url"));
+	public void addAttributes(Model model, Locale locale) {
+		model.addAttribute("s", "/static");
+		model.addAttribute("siteUrl", env.getProperty("es.ucm.fdi.tusnoticias.site-url"));
 		model.addAttribute("siteName", env.getProperty("es.ucm.fdi.tusnoticias.site-name"));
 		model.addAttribute("shortSiteName", env.getProperty("es.ucm.fdi.tusnoticias.short-site-name"));
-		
+
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
 		String formattedDate = dateFormat.format(new Date());
-		
+
 		model.addAttribute("serverTime", formattedDate);
-    }
-	
+	}
+
 	@RequestMapping(value = "/admin", method = RequestMethod.GET)
 	@Transactional
-	public String admin(Locale locale, Model model, HttpSession session) {
+	public String admin(Locale locale, Model model) {
 		String returnn = "admin";
 		model.addAttribute("pageTitle", "Administracion");
-
-		if (!UserController.isAdmin(session)) {
+		
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 			Actividad atv = Actividad.createActividad("Ha entrado a la administración", u, new Date());
 			u.getActividad().add(atv);
@@ -93,16 +95,16 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/flot", method = RequestMethod.GET)
-	public String adminFlot(Locale locale, Model model, HttpSession session) {
+	public String adminFlot(Locale locale, Model model) {
 		String returnn = "admin/flot";
 
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -110,36 +112,36 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/morris", method = RequestMethod.GET)
-	public String adminMorris(Locale locale, Model model, HttpSession session) {
+	public String adminMorris(Locale locale, Model model) {
 		String returnn = "admin/morris";
 
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
 		return returnn;
 	}
-	
+
 	@RequestMapping(value = "/admin/tables/addTag", method = RequestMethod.POST)
 	@Transactional
-	public String adminTablesAddTag(@RequestParam("tag") String tag, Locale locale, Model model, HttpSession session) {
+	public String adminTablesAddTag(@RequestParam("tag") String tag, Locale locale, Model model) {
 		String returnn = "redirect:/admin/tables";
-		
-		if (!UserController.isAdmin(session)) {
+
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
-			
+			User u = UserController.getInstance().getPrincipal().getUser();
+
 			Tag nTag = new Tag();
 			nTag.setArticulo(new ArrayList<Articulo>());
 			nTag.setNombre(tag);
-			
+
 			entityManager.persist(nTag);
 
 			logger.info("Tag added {}", nTag.getNombre());
@@ -147,21 +149,22 @@ public class AdminController {
 
 		return returnn;
 	}
-	
+
 	@RequestMapping(value = "/admin/tables/addPeriodico", method = RequestMethod.POST)
 	@Transactional
-	public String adminTablesAddPeriodico(@RequestParam("periodico") String nombre, @RequestParam("url") String url, Locale locale, Model model, HttpSession session) {
+	public String adminTablesAddPeriodico(@RequestParam("periodico") String nombre, @RequestParam("url") String url,
+			Locale locale, Model model) {
 		String returnn = "redirect:/admin/tables";
-		
-		if (!UserController.isAdmin(session)) {
+
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
-			
+			User u = UserController.getInstance().getPrincipal().getUser();
+
 			Periodico periodico = new Periodico();
 			periodico.setNombre(nombre);
 			periodico.setUrl(url);
-			
+
 			entityManager.persist(periodico);
 
 			logger.info("Periodico added {}", periodico.getNombre());
@@ -169,17 +172,17 @@ public class AdminController {
 
 		return returnn;
 	}
-	
+
 	@RequestMapping(value = "/admin/tables", method = RequestMethod.GET)
-	public String adminTables(Locale locale, Model model, HttpSession session) {
+	public String adminTables(Locale locale, Model model) {
 		String returnn = "admin/tables";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 			model.addAttribute("mensajes",
 					entityManager.createNamedQuery("allMensajesByUser").setParameter("userParam", u).getResultList());
@@ -201,15 +204,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/forms", method = RequestMethod.GET)
-	public String adminForms(Locale locale, Model model, HttpSession session) {
+	public String adminForms(Locale locale, Model model) {
 		String returnn = "admin/forms";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Ripper articles interface Opened by {}", u.getLogin());
 			model.addAttribute("periodicos",
 					entityManager.createNamedQuery("allPeriodicos").setMaxResults(10000).getResultList());
@@ -220,19 +223,19 @@ public class AdminController {
 
 	@RequestMapping(value = "/admin/forms/publicar", method = RequestMethod.POST)
 	@Transactional
-	public String adminRipPublicar(@RequestParam("articulo") String articulo, @RequestParam("tags") String tags, @RequestParam("titulo") String titulo,
-			Locale locale, Model model, HttpSession session) {
+	public String adminRipPublicar(@RequestParam("articulo") String articulo, @RequestParam("tags") String tags,
+			@RequestParam("titulo") String titulo, Locale locale, Model model) {
 		String returnn = "admin/forms";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
 		articulo = Encode.forHtmlContent(articulo);
-		
-		if (!UserController.isAdmin(session)) {
+		tags = Encode.forHtmlContent(tags);
+
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
-			u = (User) entityManager.find(User.class, u.getId());
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Article ripp public by {}", u.getLogin());
 
 			model.addAttribute("periodicos",
@@ -240,13 +243,12 @@ public class AdminController {
 
 			List<String> contenido = new ArrayList<String>();
 			String[] arrayS = articulo.split("\\r?\\n");
-			
 			String[] arrayTags = tags.split(",");
 
-			for (String s : arrayS){
-				if(s.length() > 50){
+			for (String s : arrayS) {
+				if (s.length() > 50) {
 					String[] subss = s.split("a");
-					for(String subs : subss)
+					for (String subs : subss)
 						contenido.add('a' + subs);
 				} else {
 					contenido.add(s);
@@ -258,56 +260,32 @@ public class AdminController {
 
 			Set<Tag> nTags = new HashSet<>();
 			nTags.add(Tag.newTag("administrativo"));
-			
-			
+
 			for (String tg : arrayTags) {
 				List<Tag> ta = entityManager.createNamedQuery("allByTag").setParameter("tagParam", tg).getResultList();
 				if (!ta.isEmpty()) {
-					for(Tag taa: ta)
+					for (Tag taa : ta)
 						nTags.add(taa);
 				} else {
 					Tag tagN = Tag.newTag(tg);
-					entityManager.persist(tagN); 
-					entityManager.flush();
 					nTags.add(tagN);
 				}
 			}
-			
+
 			Articulo article = Articulo.crearArticuloAdministrativo(u, contenido, titulo, nTags);
-			entityManager.persist(article);
-			entityManager.flush();
-			long ids = article.getId();
-			String idSs = Long.toString(ids);
-			/*
-			 * @RequestParam("artimagen") MultipartFile imagen
-			 
-			if (!imagen.isEmpty()) {
-				try {
-
-					byte[] bytes = imagen.getBytes();
-					BufferedOutputStream stream = new BufferedOutputStream(
-							new FileOutputStream(ContextInitializer.getFile("articulos", idSs)));
-					stream.write(bytes);
-					stream.close();
-					
-					article.setImage(ContextInitializer.getFile("articulos", idSs).getAbsolutePath());
-					
-					model.addAttribute("imagen", Encode.forUriComponent(ContextInitializer.getFile("articulos", idSs).getAbsolutePath()));
-					// ContextInitializer.getFile("user", id).getAbsolutePath();
-
-				} catch (Exception e) {
-					return "You failed to upload for Article " + idSs + " => " + e.getMessage();
-				}
-			}
-			*/
 			
-			Actividad atv = Actividad.createActividad("Ha publicado un articulo administrativo titulado:" + '"' + titulo + '"', u, new Date());
-			u.getActividad().add(atv);
-
-			returnn = "redirect:/articulo/" + ids;
-			
-			for (Tag tagf : nTags)
+			for (Tag tagf : nTags) {
 				tagf.getArticulo().add(article);
+				entityManager.persist(tagf);
+			}
+			entityManager.persist(article);
+			
+			Actividad atv = Actividad.createActividad(
+					"Ha publicado un articulo administrativo titulado:" + '"' + titulo + '"', u, new Date());
+			u.getActividad().add(atv);
+			entityManager.persist(u);
+			
+			returnn = "redirect:/articulo/" + article.getId();
 		}
 		return returnn;
 	}
@@ -316,21 +294,21 @@ public class AdminController {
 	@Transactional
 	public String adminRip(@RequestParam("periodico") long periodicoId, @RequestParam("tipo") String tipo,
 			@RequestParam("urlarticulo") String url, @RequestParam("identificador") String identificador, Locale locale,
-			Model model, HttpSession session) {
+			Model model) {
 		String returnn = "admin/forms";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Article ripp load by {}", u.getLogin());
 			model.addAttribute("periodicos",
 					entityManager.createNamedQuery("allPeriodicos").setMaxResults(10000).getResultList());
 			Periodico p = (Periodico) entityManager.find(Periodico.class, periodicoId);
 			if (p != null) {
-				ArticleRipper ar = new ArticleRipper(url);
+				ArticleRipper ar = new ArticleRipper(Encode.forHtml(url));
 				Document doc = ar.getDocument();
 				Elements els = null;
 				Element el = null;
@@ -376,15 +354,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/panels-wells", method = RequestMethod.GET)
-	public String adminPanelWells(Locale locale, Model model, HttpSession session) {
+	public String adminPanelWells(Locale locale, Model model) {
 		String returnn = "admin/panels-wells";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -392,15 +370,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/buttons", method = RequestMethod.GET)
-	public String adminButtons(Locale locale, Model model, HttpSession session) {
+	public String adminButtons(Locale locale, Model model) {
 		String returnn = "admin/buttons";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -408,15 +386,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/notifications", method = RequestMethod.GET)
-	public String adminNotifications(Locale locale, Model model, HttpSession session) {
+	public String adminNotifications(Locale locale, Model model) {
 		String returnn = "admin/notifications";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -424,15 +402,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/typography", method = RequestMethod.GET)
-	public String adminTypography(Locale locale, Model model, HttpSession session) {
+	public String adminTypography(Locale locale, Model model) {
 		String returnn = "admin/typography";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -440,15 +418,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/icons", method = RequestMethod.GET)
-	public String adminIcons(Locale locale, Model model, HttpSession session) {
+	public String adminIcons(Locale locale, Model model) {
 		String returnn = "admin/icons";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -456,15 +434,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/grid", method = RequestMethod.GET)
-	public String adminGrid(Locale locale, Model model, HttpSession session) {
+	public String adminGrid(Locale locale, Model model) {
 		String returnn = "admin/grid";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -472,15 +450,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/blank", method = RequestMethod.GET)
-	public String adminBlank(Locale locale, Model model, HttpSession session) {
+	public String adminBlank(Locale locale, Model model) {
 		String returnn = "admin/blank";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -488,15 +466,15 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/loginSettings", method = RequestMethod.GET)
-	public String adminLoginSettings(Locale locale, Model model, HttpSession session) {
+	public String adminLoginSettings(Locale locale, Model model) {
 		String returnn = "admin/login";
 		model.addAttribute("pageTitle", "Administracion");
 		model.addAttribute("prefix", "./../");
 
-		if (!UserController.isAdmin(session)) {
+		if (!UserController.isAdmin()) {
 			returnn = "redirect:/admin/login";
 		} else {
-			User u = (User) session.getAttribute("user");
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -504,12 +482,12 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/admin/login", method = RequestMethod.GET)
-	public String adminlogin(Locale locale, Model model, HttpSession session) {
+	public String adminlogin(Locale locale, Model model) {
 		String returnn = "admin_login";
 		model.addAttribute("pageTitle", "Login");
 		model.addAttribute("prefix", "./../");
 
-		if (UserController.isAdmin(session))
+		if (UserController.isAdmin())
 			returnn = "redirect:/admin";
 
 		return returnn;
@@ -523,7 +501,7 @@ public class AdminController {
 	@Transactional // needed to allow DB change
 	public ResponseEntity<String> bookAuthors(@RequestParam("id") long id, @RequestParam("csrf") String token,
 			HttpSession session) {
-		if (!UserController.isAdmin(session) || !UserController.isTokenValid(session, token)) {
+		if (!UserController.isAdmin() || !UserController.isTokenValid(session, token)) {
 			return new ResponseEntity<String>("Error: no such user or bad auth", HttpStatus.FORBIDDEN);
 		} else if (entityManager.createNamedQuery("delUser").setParameter("idParam", id).executeUpdate() == 1) {
 			return new ResponseEntity<String>("Ok: user " + id + " removed", HttpStatus.OK);
@@ -531,7 +509,7 @@ public class AdminController {
 			return new ResponseEntity<String>("Error: no such user", HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@ResponseBody
 	@RequestMapping(value = "/articulo/{id}/image", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
 	public byte[] articuloPhoto(@PathVariable("id") long id) throws IOException {

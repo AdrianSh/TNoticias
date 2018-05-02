@@ -1,5 +1,6 @@
 <%@ include file="../jspf/header.jspf"%>
-<%@ taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
+<%@ taglib prefix="e"
+	uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project"%>
 <!-- Page Content -->
 <section class="container">
 	<div class="row">
@@ -9,7 +10,10 @@
 		<section class="col-md-7">
 
 			<div class="row">
-				<form action="${prefix}/usuario/crear" role="form" class="form-register" method="POST">
+				<form action="${siteUrl}/usuario/crear" role="form"
+					class="form-register" method="POST">
+					<input type="hidden" name="${_csrf.parameterName}"
+						value="${_csrf.token}" />
 					<h2>
 						Registrate <small>Es gratis, como debe ser!</small>
 					</h2>
@@ -17,47 +21,52 @@
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
-								<input type="text" name="nombre" id="first_name" 
-									class="form-control input-lg label_better" placeholder="Nombre" tabindex="1">
+								<input type="text" name="nombre" id="first_name"
+									class="form-control input-lg label_better" placeholder="Nombre"
+									tabindex="1">
 							</div>
 						</div>
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
 								<input type="text" name="apellido" id="last_name"
-									class="form-control input-lg label_better" placeholder="Apellidos"
-									tabindex="2">
+									class="form-control input-lg label_better"
+									placeholder="Apellidos" tabindex="2">
 							</div>
 						</div>
 					</div>
 					<div class="form-group">
 						<input type="text" name="login" id="display_name"
-							class="form-control input-lg label_better" placeholder="Sobrenombre o Alias"
-							tabindex="3">
+							class="form-control input-lg label_better"
+							placeholder="Sobrenombre o Alias" tabindex="3">
 					</div>
 					<div class="form-group">
 						<input type="email" name="email" id="email"
-							class="form-control input-lg label_better" placeholder="Email" tabindex="4">
+							class="form-control input-lg label_better" placeholder="Email"
+							tabindex="4">
 					</div>
 					<div class="form-group">
 						<input type="text" name="pregunta" id="pregunta"
-							class="form-control input-lg label_better" placeholder="Pregunta de seguridad" tabindex="5">
+							class="form-control input-lg label_better"
+							placeholder="Pregunta de seguridad" tabindex="5">
 					</div>
 					<div class="form-group">
 						<input type="text" name="respuesta" id="respuesta"
-							class="form-control input-lg label_better" placeholder="Respuesta de seguridad" tabindex="6">
+							class="form-control input-lg label_better"
+							placeholder="Respuesta de seguridad" tabindex="6">
 					</div>
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
-								<input type="password" name="pass" id="password" 
-									class="form-control input-lg label_better" placeholder="Contraseña"
-									tabindex="5">
+								<input type="password" name="pass" id="password"
+									class="form-control input-lg label_better"
+									placeholder="Contraseña" tabindex="5">
 							</div>
 						</div>
 						<div class="col-xs-12 col-sm-6 col-md-6">
 							<div class="form-group">
 								<input type="password" name="passConf"
-									id="password_confirmation" class="form-control input-lg label_better"
+									id="password_confirmation"
+									class="form-control input-lg label_better"
 									placeholder="Repita su contraseña" tabindex="6">
 							</div>
 						</div>
@@ -66,7 +75,8 @@
 						<div class="col-xs-8 col-sm-9 col-md-9">
 							Al presionar <strong class="label label-primary">Registrarme</strong>,
 							tu aceptas los <a href="#" data-toggle="modal"
-								data-target="#t_and_c_m">Terminos y condiciones</a> del sitio, incluyendo nuestro uso de Cookies.
+								data-target="#t_and_c_m">Terminos y condiciones</a> del sitio,
+							incluyendo nuestro uso de Cookies.
 						</div>
 					</div>
 

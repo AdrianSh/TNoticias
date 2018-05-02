@@ -1,10 +1,7 @@
 package es.ucm.fdi.tusnoficias.model;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -18,7 +15,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import org.owasp.encoder.Encode;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "allUsers", query = "select u from User u"),
@@ -28,14 +24,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 })
 public class User {
 
-	private static BCryptPasswordEncoder bcryptEncoder = new BCryptPasswordEncoder();
-
 	// do not change these fields - all web applications with user
 	// authentication need them
 	private long id;
 	private String login;
-	private String role;
-	private String hashedAndSalted;
+	private String roles;  // split by , to separate roles
+	private boolean enabled;
+	private String password;
 	private String name;
 	private String lname;
 	private String email;
@@ -53,7 +48,6 @@ public class User {
 	private List<Amigos> amigos;
 	private List<Actividad> actividad;
 	
-	
 	private List<Mensajes> mensajes;
 	private List<ComentarioPerfil> comentariosPerfil;
 	private List<Integer> puntuacionesId;
@@ -62,12 +56,12 @@ public class User {
 	public User() {
 	}
 
-	public static User createUser(String login, String pass, String role, String nombre, String apellido,
+	public static User createUser(String login, String pass, String roles, String nombre, String apellido,
 			String email, String preguntaDeSeguridad, String respuestaDeSeguridad) {
 		User u = new User();
 		u.login = Encode.forHtmlContent(login);
-		u.hashedAndSalted = generateHashedAndSalted(Encode.forHtmlContent(pass));
-		u.role = Encode.forHtmlContent(role);
+		u.password = pass; // Encode.forHtmlContent(pass));
+		u.roles = Encode.forHtmlContent(roles);
 		u.name = Encode.forHtmlContent(nombre);
 		u.email = Encode.forHtmlContent(email);
 		u.lname = Encode.forHtmlContent(apellido);
@@ -84,48 +78,6 @@ public class User {
 		u.puntuacionesHechasId = new ArrayList<Integer>();
 		u.puntuacionesId = new ArrayList<Integer>();
 		return u;
-	}
-	public void cambiarUserPass(String pass){
-		hashedAndSalted = generateHashedAndSalted(pass);
-	}
-	/*
-	public static void main(String[] args) {
-		System.err.println(generateHashedAndSalted("lolo"));
-	}
-	*/
-	public boolean isPassValid(String pass) {
-		return bcryptEncoder.matches(pass, hashedAndSalted);
-	}
-	
-	public static boolean isHashValid(String pass, String hashedAndSalted) {
-		return bcryptEncoder.matches(pass, hashedAndSalted);
-	}
-
-	/**
-	 * Generate a hashed&salted hex-string from a user's pass and salt
-	 * 
-	 * @param pass
-	 *            to use; no length-limit!
-	 * @param salt
-	 *            to use
-	 * @return a string to store in the BD that does not reveal the password
-	 *         even if the DB is compromised. Note that brute-force is possible,
-	 *         but it will have to be targeted (ie.: use the same salt)
-	 */
-	public static String generateHashedAndSalted(String pass) {
-		/*
-		 * Código viejo: sólo 1 iteración de SHA-1. bCrypt es mucho más seguro
-		 * (itera 1024 veces...)
-		 * 
-		 * Además, bcryptEncoder guarda la sal junto a la contraseña byte[]
-		 * saltBytes = hexStringToByteArray(user.salt); byte[] passBytes =
-		 * pass.getBytes(); byte[] toHash = new byte[saltBytes.length +
-		 * passBytes.length]; System.arraycopy(passBytes, 0, toHash, 0,
-		 * passBytes.length); System.arraycopy(saltBytes, 0, toHash,
-		 * passBytes.length, saltBytes.length); return
-		 * byteArrayToHexString(sha1hash(toHash));
-		 */
-		return bcryptEncoder.encode(pass);
 	}
 
 	/**
@@ -218,24 +170,24 @@ public class User {
 		this.login = login;
 	}
 
-	public String getHashedAndSalted() {
-		return hashedAndSalted;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setHashedAndSalted(String hashedAndSalted) {
-		this.hashedAndSalted = hashedAndSalted;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-	public String getRole() {
-		return role;
+	public String getRoles() {
+		return roles;
 	}
 
-	public void setRole(String role) {
-		this.role = role;
+	public void setRoles(String roles) {
+		this.roles = roles;
 	}
 
 	public String toString() {
-		return "" + id + " " + login + " " + hashedAndSalted;
+		return "" + id + " " + login + " " + password;
 	}
 
 	@OneToMany(targetEntity = Comentario.class)
@@ -386,5 +338,13 @@ public class User {
 	
 	public void setRespuestaDeSeguridad(String respuestaDeSeguridad){
 		this.respuestaDeSeguridad = respuestaDeSeguridad; 
+	}
+
+	public boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

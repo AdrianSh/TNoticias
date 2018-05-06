@@ -84,7 +84,8 @@ public class AdminController {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
 			Actividad atv = Actividad.createActividad("Ha entrado a la administración", u, new Date());
-			u.getActividad().add(atv);
+			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
+			u.addActividad(actvs, atv);
 			model.addAttribute("mensajes",
 					entityManager.createNamedQuery("allMensajesByUser").setParameter("userParam", u).getResultList());
 			model.addAttribute("actividades",
@@ -282,7 +283,8 @@ public class AdminController {
 			
 			Actividad atv = Actividad.createActividad(
 					"Ha publicado un articulo administrativo titulado:" + '"' + titulo + '"', u, new Date());
-			u.getActividad().add(atv);
+			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
+			u.addActividad(actvs, atv);
 			entityManager.persist(u);
 			
 			returnn = "redirect:/articulo/" + article.getId();

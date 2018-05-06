@@ -15,6 +15,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import org.owasp.encoder.Encode;
+import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "allUsers", query = "select u from User u"),
@@ -236,6 +237,10 @@ public class User {
 		this.amigos = amigos;
 	}
 	
+	public boolean esMiAmigo(List<Amigos> amigos, User us) {
+		return amigos.contains(us);
+	}
+	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
 	public List<Actividad> getActividad() {
 		return actividad;
@@ -243,6 +248,11 @@ public class User {
 
 	public void setActividad(List<Actividad> actividad) {
 		this.actividad = actividad;
+	}
+	
+	public void addActividad(List<Actividad> actividades, Actividad a) {
+		actividades.add(a);
+		this.actividad = actividades;
 	}
 	
 

@@ -115,6 +115,12 @@
 			<version>1.2.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.22.0-GA</version>
+		</dependency>
 
 	</dependencies>
 

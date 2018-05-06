@@ -71,14 +71,6 @@ public class HomeController {
 		return "articulos/articulos";
 	}
 
-	@RequestMapping(value = "/error", method = RequestMethod.GET)
-	public String errorPage() {
-		String returnn = "error";
-		if(UserController.isAdmin())
-			returnn = "error_admin";
-		return returnn;
-	}
-
 	@RequestMapping(value = "/noregistro", method = RequestMethod.GET)
 	public String noRegistro(Locale locale, Model model) {
 		model.addAttribute("pageTitle", "No Registro");

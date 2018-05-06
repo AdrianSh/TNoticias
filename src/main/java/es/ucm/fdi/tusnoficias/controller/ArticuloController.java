@@ -115,7 +115,9 @@ public class ArticuloController {
 			Actividad atv = Actividad.createActividad(
 					"Ha publicado un articulo normal titulado:" + '"' + Encode.forHtmlContent(titulo) + '"', u,
 					new Date());
-			u.getActividad().add(atv);
+			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
+			
+			u.addActividad(actvs, atv);
 			
 			
 			entityManager.persist(atv);
@@ -274,13 +276,13 @@ public class ArticuloController {
 	public String misArticulos(HttpServletResponse response, Model model, Locale locale) {
 		String returnn = "articulos/articulos";
 		model.addAttribute("prefix", "../");
-		model.addAttribute("pageTitle", "Articulo nuevo");
+		// model.addAttribute("pageTitle", "Articulo nuevo");
+		model.addAttribute("pageTitle", "Mis articulos");
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		ponderRanking();
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-
+		
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
@@ -291,16 +293,7 @@ public class ArticuloController {
 					.setParameter("autorParam", u).setMaxResults(10000).getResultList());
 			model.addAttribute("user", u);
 		} else {
-			model.addAttribute("pageTitle", "Mis articulos");
-			model.addAttribute("categorias",
-					entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-			model.addAttribute("rightArticulos",
-					entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-
-			model.addAttribute("prefix", "../");
-
 			model.addAttribute("mMensaje", "Debes estar registrado para poder ver tus articulos.");
-
 			returnn = "noregistro";
 		}
 		return returnn;

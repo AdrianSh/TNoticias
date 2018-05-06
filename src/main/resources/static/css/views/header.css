@@ -42,7 +42,7 @@
     border-top: 0;
     box-shadow: 1px 1px 1px black;
     min-height: 15vh;
-    background-image: url("../../img/fondo.svg");
+    background-image: url("../../img/fondo.png");
     background-size: cover;
     background-position-y: 200px;
 }

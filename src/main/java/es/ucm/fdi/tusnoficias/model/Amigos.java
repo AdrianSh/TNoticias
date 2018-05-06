@@ -13,7 +13,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 
 @Entity
-@NamedQueries({ @NamedQuery(name = "allAmigos", query = "select a from Amigos a where a.user = :userParam")})
+@NamedQueries({ @NamedQuery(name = "allAmigosByUserName", query = "select a from Amigos a where a.user = :userParam")})
 public class Amigos {
 	private long id;
 	private User user;

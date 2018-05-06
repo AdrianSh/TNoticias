@@ -44,4 +44,8 @@ public class IwUserDetailsService implements UserDetailsService {
     		throw new UsernameNotFoundException(username, e);
     	}
     }
+    
+    public User attachUser(User u) {
+    	return this.entityManager.find(User.class, u.getId());
+    }
 }

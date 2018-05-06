@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
-import org.hibernate.Hibernate;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+
 import es.ucm.fdi.tusnoficias.LocalData;
 import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.Actividad;
@@ -83,7 +83,6 @@ public class UserController {
 		model.addAttribute("serverTime", formattedDate);
 	}
 
-	@Autowired
 	public UserController() {
 		UserController.instance = this;
 	}
@@ -169,7 +168,7 @@ public class UserController {
 		try {
 			User u1 = (User) entityManager.createNamedQuery("userByLogin")
 					.setParameter("loginParam", Encode.forHtmlContent(login)).getSingleResult();
-			model.addAttribute("error", "Ese nombre de usuario ya existe");
+			model.addAttribute("error", "Ese nombre de usuario ya existe '" + Encode.forHtmlContent(u1.getLogin()) +"'");
 			returnn = "registro";
 		} catch (NoResultException e) {
 			returnn = "registro";
@@ -207,7 +206,8 @@ public class UserController {
 	 * Locale locale) { login(formLogin, formPass, request, response, model,
 	 * session, locale); return "redirect:admin"; }
 	 */
-
+	
+	
 	@RequestMapping(value = "/perfil", method = RequestMethod.GET)
 	@Transactional
 	public String perfil(Locale locale, Model model) {
@@ -222,11 +222,13 @@ public class UserController {
 			returnn = "redirect:home";
 		} else {
 			User u = this.getPrincipal().getUser();
-			model.addAttribute("amigos",
-					entityManager.createNamedQuery("allAmigos").setParameter("userParam", u).getResultList());
+			System.err.println("Numero de amigos: " + u.getAmigos().size());
+			model.addAttribute("amigos", u.getAmigos());
+			
 			model.addAttribute("comentariosPerfil", entityManager.createNamedQuery("allComentarioPerfilByUser")
 					.setParameter("userParam", u).getResultList());
 
+			// List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
 			model.addAttribute("actividad", u.getActividad());
 		}
 
@@ -281,21 +283,27 @@ public class UserController {
 		} else {
 			User u = this.getPrincipal().getUser();
 			// It will load it agains
-			u = (User) entityManager.find(User.class, u.getId());
+			u = entityManager.find(User.class, u.getId());
 
 			if (u != null) {
+				List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
+				
 				Actividad atv = Actividad.createActividad(
 						"Ha agregado como amigo a " + us.getName() + " " + us.getLname(), u, new Date());
-				u.getActividad().add(atv);
+				u.addActividad(actvs, atv);
 
-				if (u.getAmigos().contains(us)) {
+				List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", u).getResultList();
+				
+				if (u.esMiAmigo(amigos, us)) {
 				} else {
 					Amigos ami = Amigos.createAmistad(u, us);
-					u.getAmigos().add(ami);
+					amigos.add(ami);
+					u.setAmigos(amigos);
 
 					// entityManager.persist(ami);
 					// entityManager.persist(atv);
 					entityManager.persist(u);
+					
 				}
 			}
 		}
@@ -311,12 +319,14 @@ public class UserController {
 
 		} else {
 			User u = this.getPrincipal().getUser();
-			u = (User) entityManager.find(User.class, u.getId());
+			u = entityManager.find(User.class, u.getId());
 			if (u != null) {
+				List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
+				
 				Actividad atv = Actividad.createActividad("Ha comentado el perfil de "
 						+ Encode.forHtmlContent(us.getName()) + " " + Encode.forHtmlContent(us.getLname()), u,
 						new Date());
-				u.getActividad().add(atv);
+				u.addActividad(actvs, atv);
 				ComentarioPerfil comp = ComentarioPerfil.createComment(comentario, u, us, new Date());
 				u.getComentariosPerfil().add(comp);
 
@@ -346,7 +356,7 @@ public class UserController {
 			returnn = "redirect:/";
 		} else {
 			model.addAttribute("userp", us);
-			model.addAttribute("amigos", us.getAmigos());
+			model.addAttribute("amigos", entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", us).setMaxResults(1000).getResultList());
 
 			if (!ping()) {
 				returnn = "redirect:/";
@@ -354,15 +364,21 @@ public class UserController {
 				User u = this.getPrincipal().getUser();
 
 				if (u != null) {
+					@SuppressWarnings("unchecked")
+					List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
+					
 					Actividad atv = Actividad.createActividad("Ha visitado el perfil de "
 							+ Encode.forHtmlContent(us.getName()) + " " + Encode.forHtmlContent(us.getLname()), u,
 							new Date());
-					u.getActividad().add(atv);
+					u.addActividad(actvs, atv);
 
-					this.entityManager.persist(atv);
+					// this.entityManager.persist(atv);
 					this.entityManager.persist(u);
 
-					if (Amigos.comprobarAmigo(u.getAmigos(), us)) {
+					
+					List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", u).getResultList();
+					
+					if (Amigos.comprobarAmigo(amigos, us)) {
 						// Son amigos
 						// logger.info("Son amigos:" + u.getEmail() + " de " +
 						// us.getEmail());

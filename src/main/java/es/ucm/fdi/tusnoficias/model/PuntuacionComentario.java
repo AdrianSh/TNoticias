@@ -10,12 +10,12 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 
-@NamedQueries({ @NamedQuery(name = "puntuacionById", query = "select u from Puntuacion u where u.id= :idParam"),
-	@NamedQuery(name = "topArticles", query = "SELECT a FROM Puntuacion p, Articulo a WHERE p.articulo = a GROUP BY a, p.articulo ORDER BY SUM(p.puntuacion) DESC"),
-	@NamedQuery(name = "totalArticuloPuntuacion", query = "SELECT SUM(p.puntuacion) FROM Puntuacion p WHERE p.articulo = :articuloParam"),
-	@NamedQuery(name = "puntuacionByUserAndArticle", query = "select p from Puntuacion p where p.user = :userParam and p.articulo = :articuloParam")})
+@NamedQueries({ @NamedQuery(name = "puntuacionComentarioById", query = "select u from PuntuacionComentario u where u.id= :idParam"),
+	@NamedQuery(name = "topComments", query = "SELECT comentario FROM PuntuacionComentario p GROUP BY p.comentario ORDER BY SUM(p.puntuacion) DESC"),
+	@NamedQuery(name = "totalPuntuacionComentario", query = "SELECT SUM(p.puntuacion) FROM PuntuacionComentario p WHERE p.comentario = :comentarioParam"),
+	@NamedQuery(name = "puntuacionByUserAndComment", query = "select p from PuntuacionComentario p where p.user = :userParam and p.comentario= :comentarioParam")})
 @Entity
-public class Puntuacion {
+public class PuntuacionComentario {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
@@ -26,17 +26,16 @@ public class Puntuacion {
 	private Integer puntuacion;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	private Articulo articulo;
+	private Comentario comentario;
 	
-	public Puntuacion() {}
-	public Puntuacion (Puntuacion p) {
+	public PuntuacionComentario (PuntuacionComentario p) {
 		this.user = p.user;
 		this.puntuacion = p.puntuacion;
-		this.articulo = p.articulo;
+		this.comentario = p.comentario;
 	}
-	public Puntuacion(int puntuacion, User u, Articulo art){
+	public PuntuacionComentario(int puntuacion, User u, Comentario c){
 		this.puntuacion = puntuacion;
-		this.articulo = art;
+		this.comentario = c;
 		this.user = u;
 	}
 	public Long getId() {
@@ -57,10 +56,10 @@ public class Puntuacion {
 	public void setPuntuacion(Integer p) {
 		this.puntuacion = p;
 	}
-	public Articulo getArticulo() {
-		return articulo;
+	public Comentario getComentario() {
+		return comentario;
 	}
-	public void setArticulo(Articulo objeto) {
-		this.articulo = objeto;
+	public void setComentario(Comentario o) {
+		this.comentario = o;
 	}
 }

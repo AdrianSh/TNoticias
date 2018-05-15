@@ -21,15 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 @NamedQueries({ @NamedQuery(name = "allUsers", query = "select u from User u"),
 		@NamedQuery(name = "userByLogin", query = "select u from User u where u.login = :loginParam"),
 		@NamedQuery(name = "delUser", query = "delete from User u where u.id= :idParam"),
-		@NamedQuery(name = "userByEmail", query = "select u from User u where u.email = :emailParam")
-})
+		@NamedQuery(name = "userByEmail", query = "select u from User u where u.email = :emailParam") })
 public class User {
 
 	// do not change these fields - all web applications with user
 	// authentication need them
 	private long id;
 	private String login;
-	private String roles;  // split by , to separate roles
+	private String roles; // split by , to separate roles
 	private boolean enabled;
 	private String password;
 	private String name;
@@ -45,20 +44,22 @@ public class User {
 	private List<Articulo> favoritos;
 	private List<User> seguidores;
 	private List<User> seguidos;
-	
+
 	private List<Amigos> amigos;
 	private List<Actividad> actividad;
-	
+
 	private List<Mensajes> mensajes;
 	private List<ComentarioPerfil> comentariosPerfil;
-	private List<Integer> puntuacionesId;
-	private List<Integer> puntuacionesHechasId;
+
+	private List<Puntuacion> puntuaciones;
+
+	private List<PuntuacionComentario> puntuacionesComentarios;
 
 	public User() {
 	}
 
-	public static User createUser(String login, String pass, String roles, String nombre, String apellido,
-			String email, String preguntaDeSeguridad, String respuestaDeSeguridad) {
+	public static User createUser(String login, String pass, String roles, String nombre, String apellido, String email,
+			String preguntaDeSeguridad, String respuestaDeSeguridad) {
 		User u = new User();
 		u.login = Encode.forHtmlContent(login);
 		u.password = pass; // Encode.forHtmlContent(pass));
@@ -68,16 +69,16 @@ public class User {
 		u.lname = Encode.forHtmlContent(apellido);
 		u.preguntaDeSeguridad = Encode.forHtmlContent(preguntaDeSeguridad);
 		u.respuestaDeSeguridad = Encode.forHtmlContent(respuestaDeSeguridad);
-		u.tablon = new ArrayList<Comentario>();
-		u.favoritos = new ArrayList<Articulo>();
-		u.seguidores = new ArrayList<User>();
-		u.seguidos = new ArrayList<User>();
+		u.tablon = new ArrayList<>();
+		u.favoritos = new ArrayList<>();
+		u.seguidores = new ArrayList<>();
+		u.seguidos = new ArrayList<>();
 		u.amigos = new ArrayList<>();
 		u.actividad = new ArrayList<>();
-		u.mensajes = new ArrayList<Mensajes>();
-		u.comentariosPerfil = new ArrayList<ComentarioPerfil>();
-		u.puntuacionesHechasId = new ArrayList<Integer>();
-		u.puntuacionesId = new ArrayList<Integer>();
+		u.mensajes = new ArrayList<>();
+		u.comentariosPerfil = new ArrayList<>();
+		u.puntuaciones = new ArrayList<>();
+		u.puntuacionesComentarios = new ArrayList<>();
 		return u;
 	}
 
@@ -236,11 +237,11 @@ public class User {
 	public void setAmigos(List<Amigos> amigos) {
 		this.amigos = amigos;
 	}
-	
+
 	public boolean esMiAmigo(List<Amigos> amigos, User us) {
 		return amigos.contains(us);
 	}
-	
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
 	public List<Actividad> getActividad() {
 		return actividad;
@@ -249,12 +250,11 @@ public class User {
 	public void setActividad(List<Actividad> actividad) {
 		this.actividad = actividad;
 	}
-	
+
 	public void addActividad(List<Actividad> actividades, Actividad a) {
 		actividades.add(a);
 		this.actividad = actividades;
 	}
-	
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
 	public List<Mensajes> getMensajes() {
@@ -264,7 +264,7 @@ public class User {
 	public void setMensajes(List<Mensajes> mensajes) {
 		this.mensajes = mensajes;
 	}
-	
+
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL)
 	public List<ComentarioPerfil> getComentariosPerfil() {
 		return comentariosPerfil;
@@ -272,26 +272,6 @@ public class User {
 
 	public void setComentariosPerfil(List<ComentarioPerfil> comentariosPerfil) {
 		this.comentariosPerfil = comentariosPerfil;
-	}
-	
-	@ElementCollection
-	public List<Integer> getPuntuacionesId() {
-		// aqui consulta para encontrar puntuacion
-		return puntuacionesId;
-	}
-
-	public void setPuntuacionesId(List<Integer> puntuacionesId) {
-		this.puntuacionesId = puntuacionesId;
-		// aqui consulta para guardar puntuacion
-	}
-
-	@ElementCollection
-	public List<Integer> getPuntuacionesHechasId() {
-		return puntuacionesHechasId;
-	}
-
-	public void setPuntuacionesHechasId(List<Integer> puntuacionesHechasId) {
-		this.puntuacionesHechasId = puntuacionesHechasId;
 	}
 
 	public String getName() {
@@ -333,21 +313,21 @@ public class User {
 	public void setProfileBackground(String profileBackground) {
 		this.profileBackground = profileBackground;
 	}
-	
-	public String getPreguntaDeSeguridad(){
+
+	public String getPreguntaDeSeguridad() {
 		return preguntaDeSeguridad;
 	}
-	
-	public void setPreguntaDeSeguridad(String preguntaDeSeguridad){
-		this.preguntaDeSeguridad = preguntaDeSeguridad; 
+
+	public void setPreguntaDeSeguridad(String preguntaDeSeguridad) {
+		this.preguntaDeSeguridad = preguntaDeSeguridad;
 	}
-	
-	public String getRespuestaDeSeguridad(){
+
+	public String getRespuestaDeSeguridad() {
 		return respuestaDeSeguridad;
 	}
-	
-	public void setRespuestaDeSeguridad(String respuestaDeSeguridad){
-		this.respuestaDeSeguridad = respuestaDeSeguridad; 
+
+	public void setRespuestaDeSeguridad(String respuestaDeSeguridad) {
+		this.respuestaDeSeguridad = respuestaDeSeguridad;
 	}
 
 	public boolean getEnabled() {
@@ -356,5 +336,32 @@ public class User {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	@OneToMany(mappedBy = "user")
+	public List<Puntuacion> getPuntuaciones() {
+		return puntuaciones;
+	}
+
+	public void setPuntuaciones(List<Puntuacion> puntuaciones) {
+		this.puntuaciones = puntuaciones;
+	}
+
+	@OneToMany(mappedBy = "user")
+	public List<PuntuacionComentario> getPuntuacionesComentarios() {
+		return puntuacionesComentarios;
+	}
+
+	public void setPuntuacionesComentarios(List<PuntuacionComentario> puntuacionesComentarios) {
+		this.puntuacionesComentarios = puntuacionesComentarios;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof User) {
+			User u2 = (User) o;
+			return this.id == u2.id;
+		}
+		return false;
 	}
 }

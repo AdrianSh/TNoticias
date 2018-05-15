@@ -12,7 +12,7 @@
 							${e:forHtmlContent(articulo.titulo)}<span class="fecha">${e:forHtmlContent(articulo.fecha)}</span>
 						</header>
 						<c:if test="${not empty user}">
-							<header class="opciones">
+							<header class="opciones dropdown">
 								<c:choose>
 									<c:when test="${articulo.autor == user}">
 										<a
@@ -65,17 +65,39 @@
 											</c:otherwise>
 										</c:choose>
 
-
-
-
 										<a
-											onclick="showFormAddTag($(this), ${e:forHtmlContent(articulo.id)})">
+											onclick="$('#addTagForm').show()">
 											<span class="glyphicon glyphicon-pushpin"></span>
 										</a>
 										<a
-											onclick="showFormDeleteTag($(this), ${e:forHtmlContent(articulo.id)})">
+											onclick="$('#removeTagForm').show()">
 											<span class="glyphicon glyphicon-scissors"></span>
 										</a>
+										
+										<form method='post' id="addTagForm" class="dropdown-menu" style="display: none;" action='./../articulo/anadirTag'>
+										<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
+										<input type='hidden' name='idArticulo' value='${e:forHtmlContent(articulo.id)}'>
+										<input type='submit' value='Añadir Tag'>
+										<input type="hidden" name="${_csrf.parameterName}"
+														value="${_csrf.token}" />
+										<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
+										
+										</form>
+										
+										<form method='post' id="removeTagForm" class="dropdown-menu" style="display: none;" action='./../articulo/eliminarTag'>
+										<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
+										<input type='hidden' name='idArticulo' value='${e:forHtmlContent(articulo.id)}'>
+										<input type='submit' value='Eliminar Tag'>
+										<input type="hidden" name="${_csrf.parameterName}"
+														value="${_csrf.token}" />
+										<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
+										
+										</form>
+							
+										
+										
+														
+														
 									</c:when>
 									<c:otherwise>
 										<c:choose>

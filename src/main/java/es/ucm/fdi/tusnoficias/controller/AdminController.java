@@ -140,7 +140,7 @@ public class AdminController {
 			User u = UserController.getInstance().getPrincipal().getUser();
 
 			Tag nTag = new Tag();
-			nTag.setArticulo(new ArrayList<Articulo>());
+			nTag.setArticulos(new ArrayList<Articulo>());
 			nTag.setNombre(tag);
 
 			entityManager.persist(nTag);
@@ -263,20 +263,17 @@ public class AdminController {
 			nTags.add(Tag.newTag("administrativo"));
 
 			for (String tg : arrayTags) {
-				List<Tag> ta = entityManager.createNamedQuery("allByTag").setParameter("tagParam", tg).getResultList();
-				if (!ta.isEmpty()) {
-					for (Tag taa : ta)
-						nTags.add(taa);
-				} else {
-					Tag tagN = Tag.newTag(tg);
-					nTags.add(tagN);
-				}
+				Tag ta = entityManager.find(Tag.class, tg);
+				if(ta != null)
+					nTags.add(ta);
+				else
+					nTags.add(Tag.newTag(tg));
 			}
 
 			Articulo article = Articulo.crearArticuloAdministrativo(u, contenido, titulo, nTags);
 			
 			for (Tag tagf : nTags) {
-				tagf.getArticulo().add(article);
+				tagf.getArticulos().add(article);
 				entityManager.persist(tagf);
 			}
 			entityManager.persist(article);

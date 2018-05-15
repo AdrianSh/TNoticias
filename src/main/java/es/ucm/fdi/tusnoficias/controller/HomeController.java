@@ -166,6 +166,11 @@ public class HomeController {
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
+		UserDetails uds = UserController.getInstance().getPrincipal();
+		if (uds != null) {
+			model.addAttribute("user", uds.getUser());
+		}
+
 		return "about";
 	}
 }

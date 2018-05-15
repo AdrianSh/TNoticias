@@ -41,23 +41,23 @@ public class ArticuloController {
 
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	@Autowired
 	private Environment env;
-	
+
 	@ModelAttribute
-    public void addAttributes(Model model, Locale locale) {
-        model.addAttribute("s", "/static");
+	public void addAttributes(Model model, Locale locale) {
+		model.addAttribute("s", "/static");
 		model.addAttribute("siteUrl", env.getProperty("es.ucm.fdi.tusnoticias.site-url"));
 		model.addAttribute("siteName", env.getProperty("es.ucm.fdi.tusnoticias.site-name"));
 		model.addAttribute("shortSiteName", env.getProperty("es.ucm.fdi.tusnoticias.short-site-name"));
-		
+
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
 		String formattedDate = dateFormat.format(new Date());
-		
+
 		model.addAttribute("serverTime", formattedDate);
-    }
-	
+	}
+
 	@RequestMapping(value = "/articulo/nuevo/publicar", method = RequestMethod.POST)
 	@Transactional
 	public String adminRipPublicar(@RequestParam("articulo") String articulo, @RequestParam("tags") String tags,
@@ -72,8 +72,7 @@ public class ArticuloController {
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		if (UserController.ping()) {
-			User u = (User) UserController.getInstance().getPrincipal().getUser();
-			u = (User) entityManager.find(User.class, u.getId());
+			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Article ripp public by {}", u.getLogin());
 
 			model.addAttribute("periodicos",
@@ -91,40 +90,36 @@ public class ArticuloController {
 				contenido.add(Encode.forHtmlContent(articulo));
 
 			Set<Tag> nTags = new HashSet<>();
-			nTags.add(Tag.newTag("administrativo"));
 
 			for (String tg : arrayTags) {
-				@SuppressWarnings("unchecked")
-				List<Tag> ta = entityManager.createNamedQuery("allByTag").setParameter("tagParam", tg).getResultList();
-				if (!ta.isEmpty()) {
-					for (Tag taa : ta)
-						nTags.add(taa);
-				} else {
-					Tag tagN = Tag.newTag(tg);
-					nTags.add(tagN);
+				Tag tLoaded = entityManager.find(Tag.class, tg);
+				if(tLoaded != null)
+					nTags.add(tLoaded);
+				else {
+					nTags.add(Tag.newTag(tg));
 				}
 			}
 
 			Articulo article = Articulo.crearArticuloNormal(u, contenido, Encode.forHtmlContent(titulo), nTags);
-			
+
 			for (Tag tagf : nTags) {
-				tagf.getArticulo().add(article);
+				tagf.getArticulos().add(article);
 				entityManager.persist(tagf);
 			}
-			
+
 			Actividad atv = Actividad.createActividad(
 					"Ha publicado un articulo normal titulado:" + '"' + Encode.forHtmlContent(titulo) + '"', u,
 					new Date());
-			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
-			
+			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u)
+					.getResultList();
+
 			u.addActividad(actvs, atv);
-			
-			
+
 			entityManager.persist(atv);
 			entityManager.persist(u);
 			entityManager.persist(article);
 			entityManager.flush();
-			
+
 			returnn = "redirect:/articulo/" + article.getId();
 		} else {
 			returnn = "redirect:/noregistro/";
@@ -133,13 +128,15 @@ public class ArticuloController {
 	}
 
 	@RequestMapping(value = { "/articulo/{id}", "/articulo/mostrar/{id}" }, method = RequestMethod.GET)
+	@Transactional
 	public String articulo(@PathVariable("id") long id, HttpServletResponse response, Model model, Locale locale) {
-		ponderRanking();
 		model.addAttribute("prefix", "../");
 		model.addAttribute("pageTitle", "Articulo");
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		ponderRanking();
+
+		// Reload 100 top
+		setRankingTop();
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
@@ -152,22 +149,22 @@ public class ArticuloController {
 
 			model.addAttribute("articuloComentarios", entityManager.createNamedQuery("allComentariosByArticulo")
 					.setParameter("articuloParam", art).setMaxResults(100).getResultList());
-		}
-		if (UserController.ping()) {
-			User u = UserController.getInstance().getPrincipal().getUser();
-			u = (User) entityManager.find(User.class, u.getId());
-			model.addAttribute("user", u);
-			for (int pid : art.getPuntuacionesId()) {
-				if (u.getPuntuacionesId().contains(pid)) {
-					Puntuacion pp = (Puntuacion) entityManager.find(Puntuacion.class, pid);
 
-					if (pp.getPositivos() > 0) {
-						model.addAttribute("puntuacionP", true);
+			if (UserController.ping()) {
+				User u = UserController.getInstance().getPrincipal().getUser();
+				model.addAttribute("user", u);
+
+				try {
+					Puntuacion p = entityManager.createNamedQuery("puntuacionByUserAndArticle", Puntuacion.class)
+							.setParameter("userParam", u).setParameter("articuloParam", art).getSingleResult();
+					if (p != null) {
+						if (p.getPuntuacion() > 0)
+							model.addAttribute("puntuacionP", true);
+						else
+							model.addAttribute("puntuacionN", true);
 					}
-					if (pp.getNegativos() > 0) {
-						model.addAttribute("puntuacionN", true);
-					}
-					break;
+				} catch (NoResultException e) {
+					logger.debug("No hay puntuaciones de " + u.getLogin() + " para el articulo " + art.getId());
 				}
 			}
 		}
@@ -175,13 +172,14 @@ public class ArticuloController {
 	}
 
 	@RequestMapping(value = { "/articulo/tag/{tag}", "/articulos/tag/{tag}" }, method = RequestMethod.GET)
+	@Transactional
 	public String articulosbytag(@PathVariable("tag") String tagName, HttpServletResponse response, Model model,
 			Locale locale) {
 		model.addAttribute("prefix", "./");
 		model.addAttribute("pageTitle", "Articulo");
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		ponderRanking();
+
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
@@ -190,7 +188,7 @@ public class ArticuloController {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			logger.error("No such tag: {}", tagName);
 		} else {
-			model.addAttribute("articulos", tag.getArticulo());
+			model.addAttribute("articulos", tag.getArticulos());
 		}
 
 		if (UserController.ping())
@@ -207,7 +205,9 @@ public class ArticuloController {
 		model.addAttribute("pageTitle", "Articulo nuevo");
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		ponderRanking();
+
+		// Reload 100 top
+		setRankingTop();
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
@@ -220,8 +220,6 @@ public class ArticuloController {
 			model.addAttribute("pageTitle", "Articulo nuevo");
 			model.addAttribute("categorias",
 					entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-			model.addAttribute("rightArticulos",
-					entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 			model.addAttribute("prefix", "../");
 			model.addAttribute("mMensaje", "Debes estar registrado para poder publicar un articulo.");
 			returnn = "noregistro";
@@ -239,7 +237,9 @@ public class ArticuloController {
 		model.addAttribute("pageTitle", "Articulo nuevo");
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		ponderRanking();
+
+		// Reload 100 top
+		setRankingTop();
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
@@ -248,23 +248,17 @@ public class ArticuloController {
 			User u = uds.getUser();
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 
-			@SuppressWarnings("unchecked")
-			List<Tag> tags = entityManager.createNamedQuery("allByTag").setParameter("tagParam", tag).getResultList();
-			if (!tags.isEmpty()) {
-				for (Tag tg : tags) {
-					List<Articulo> articulos = tg.getArticulo();
-					// Falta implementar que los articulos que le son pasados al
-					// usuario sean ordenados por fecha
-					if (articulos.size() > 10)
-						for (int i = 10; i < articulos.size(); i++)
-							articulos.remove(i);
+			Tag tg = entityManager.find(Tag.class, tag);
+			if(tg == null)
+				return returnn;
+			List<Articulo> articulos = tg.getArticulos();
+			// Falta implementar que los articulos que le son pasados al
+			// usuario sean ordenados por fecha
+			if (articulos.size() > 10)
+				for (int i = 10; i < articulos.size(); i++)
+					articulos.remove(i);
 
-					model.addAttribute("articulos", articulos);
-				}
-			} else {
-				returnn = "redirect:/articulo/nuevo";
-			}
-
+			model.addAttribute("articulos", articulos);
 		} else
 			returnn = "redirect:/";
 
@@ -282,7 +276,7 @@ public class ArticuloController {
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-		
+
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
@@ -305,7 +299,9 @@ public class ArticuloController {
 		String returnn = "articulos/articulos";
 		model.addAttribute("prefix", "../");
 		model.addAttribute("pageTitle", "Ranking");
-		ponderRanking();
+
+		// Reload 100 top
+		setRankingTop();
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
 		model.addAttribute("rightArticulos",
@@ -343,7 +339,9 @@ public class ArticuloController {
 		model.addAttribute("pageTitle", "Articulos favoritos");
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		ponderRanking();
+
+		// Reload 100 top
+		setRankingTop();
 		model.addAttribute("rightArticulos",
 				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
@@ -378,26 +376,30 @@ public class ArticuloController {
 	@Transactional
 	public String borrarArticulo(@PathVariable("id") long id, HttpServletResponse response, Model model,
 			Locale locale) {
-		String returnn;
-		
+		String returnn = "redirect:/articulos";
+
 		UserDetails uds = UserController.getInstance().getPrincipal();
-		
+		Articulo art = entityManager.find(Articulo.class, id);
+
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", id);
+			return "redirect:/home";
+		}
 		if (uds != null) {
 			try {
 				User u = uds.getUser();
 
-				Articulo art = entityManager.find(Articulo.class, id);
-				if (art.getAutor() == u) {
+				// Para no usar CASCADE [Perform]
+				if (art.getAutor().equals(u)) {
 					for (Comentario com : art.getComentario())
 						entityManager.remove(com);
 
 					for (Tag tag : art.getTags())
 						entityManager.remove(tag);
 
-					for (Integer p : art.getPuntuacionesId()) {
-						Puntuacion pun = entityManager.find(Puntuacion.class, (long) (int) p);
-						entityManager.remove(pun);
-					}
+					for (Puntuacion p : art.getPuntuaciones())
+						entityManager.remove(p);
 
 					entityManager.remove(art);
 					response.setStatus(HttpServletResponse.SC_OK);
@@ -431,14 +433,21 @@ public class ArticuloController {
 	 */
 	@RequestMapping(value = "/articulo/favorito", method = RequestMethod.POST)
 	@Transactional
-	public String anadirArticuloFavorito(@RequestParam("idArticulo") long idArticulo, Model model) {
+	public String anadirArticuloFavorito(@RequestParam("idArticulo") long idArticulo, Model model,
+			HttpServletResponse response) {
 
 		Articulo art = entityManager.find(Articulo.class, idArticulo);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", idArticulo);
+			return "redirect:/home";
+		}
+
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
 			user.getFavoritos().add(art);
-			
+
 			entityManager.persist(user);
 			logger.info("Articulo " + art.getId() + " añadido a favoritos de " + user.getLogin());
 		}
@@ -447,9 +456,16 @@ public class ArticuloController {
 
 	@RequestMapping(value = "/articulo/{id}/favorito", method = RequestMethod.GET)
 	@Transactional
-	public String anadirArticuloFavoritoById(@PathVariable("id") long idArticulo, Model model) {
+	public String anadirArticuloFavoritoById(@PathVariable("id") long idArticulo, Model model,
+			HttpServletResponse response) {
 
 		Articulo art = entityManager.find(Articulo.class, idArticulo);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", idArticulo);
+			return "redirect:/home";
+		}
+
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
@@ -471,35 +487,28 @@ public class ArticuloController {
 
 	@RequestMapping(value = "/articulo/puntuarP", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
-	public String puntuarArticuloPositivo(@RequestParam("id") long id) {
+	public String puntuarArticuloPositivo(@RequestParam("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", id);
+			return "redirect:/home";
+		}
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
-
-			boolean punteado = false;
-			int puntuacionId = 0;
-
-			for (int pid : art.getPuntuacionesId()) {
-				if (user.getPuntuacionesId().contains(pid)) {
-					punteado = true;
-					puntuacionId = pid;
-					break;
-				}
+			Puntuacion p;
+			try {
+				p = entityManager.createNamedQuery("puntuacionByUserAndArticle", Puntuacion.class)
+						.setParameter("userParam", user).setParameter("articuloParam", art).getSingleResult();
+			} catch (NoResultException e) {
+				// Primera vez que puntua el articulo
+				p = new Puntuacion(1, user, art);
 			}
 
-			if (punteado) {
-				user.getPuntuacionesId().remove(puntuacionId);
-				art.getPuntuacionesId().remove(puntuacionId);
-				logger.info("Articulo " + art.getId() + " puntuacion positiva retirada");
-			} else {
-				Puntuacion p = new Puntuacion(1, 0);
-				p.setUsuario(user.getId());
-				art.getPuntuacionesId().add((Integer) (int) p.getId());
-				art.getAutor().getPuntuacionesId().add((Integer) (int) p.getId());
-				entityManager.persist(p);
-				logger.info("Articulo " + art.getId() + " puntuado positivo");
-			}
+			p.setPuntuacion(1);
+
+			entityManager.persist(p);
 			entityManager.persist(art);
 			entityManager.persist(user);
 		}
@@ -508,35 +517,27 @@ public class ArticuloController {
 
 	@RequestMapping(value = "/articulo/{id}/puntuarP", method = RequestMethod.GET)
 	@Transactional
-	public String puntuarArticuloPositivob(@PathVariable("id") long id) {
+	public String puntuarArticuloPositivob(@PathVariable("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", id);
+			return "redirect:/home";
+		}
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
-			Boolean punteado = false;
-			Integer puntuacionId = 0;
-
-			for (int pid : art.getPuntuacionesId()) {
-				if (user.getPuntuacionesId().contains(pid)) {
-					punteado = true;
-					puntuacionId = pid;
-					break;
-				}
+			Puntuacion p;
+			try {
+				p = entityManager.createNamedQuery("puntuacionByUserAndArticle", Puntuacion.class)
+						.setParameter("userParam", user).setParameter("articuloParam", art).getSingleResult();
+			} catch (NoResultException e) {
+				// Primera vez que puntua el articulo
+				p = new Puntuacion(1, user, art);
 			}
+			p.setPuntuacion(1);
 
-			if (punteado) {
-				user.getPuntuacionesId().remove(puntuacionId);
-				art.getPuntuacionesId().remove(puntuacionId);
-				logger.info("Articulo " + art.getId() + " puntuacion positiva retirada");
-			} else {
-				Puntuacion p = new Puntuacion(1, 0);
-				p.setUsuario(user.getId());
-
-				art.getPuntuacionesId().add((Integer) (int) p.getId());
-				art.getAutor().getPuntuacionesId().add((Integer) (int) p.getId());
-				entityManager.persist(p);
-				logger.info("Articulo " + art.getId() + " puntuado positivo");
-			}
+			entityManager.persist(p);
 			entityManager.persist(art);
 			entityManager.persist(user);
 		}
@@ -549,73 +550,57 @@ public class ArticuloController {
 
 	@RequestMapping(value = "/articulo/puntuarN", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
-	public String puntuarArticuloNegativo(@RequestParam("id") long id) {
+	public String puntuarArticuloNegativo(@RequestParam("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", id);
+			return "redirect:/home";
+		}
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
-			boolean punteado = false;
-			int puntuacionId = 0;
-
-			for (int pid : art.getPuntuacionesId()) {
-				if (user.getPuntuacionesId().contains(pid)) {
-					punteado = true;
-					puntuacionId = pid;
-					break;
-				}
+			Puntuacion p;
+			try {
+				p = entityManager.createNamedQuery("puntuacionByUserAndArticle", Puntuacion.class)
+						.setParameter("userParam", user).setParameter("articuloParam", art).getSingleResult();
+			} catch (NoResultException e) {
+				// Primera vez que puntua el articulo
+				p = new Puntuacion(1, user, art);
 			}
 
-			if (punteado) {
-				user.getPuntuacionesId().remove(puntuacionId);
-				art.getPuntuacionesId().remove(puntuacionId);
-				logger.info("Articulo " + art.getId() + " puntuacion negativa retirada");
-			} else {
-				Puntuacion p = new Puntuacion(0, 1);
-				p.setUsuario(user.getId());
-				
-				art.getPuntuacionesId().add((Integer) (int) p.getId());
-				art.getAutor().getPuntuacionesId().add((Integer) (int) p.getId());
-				entityManager.persist(p);
-				logger.info("Articulo " + art.getId() + " puntuado negativo");
-			}
+			p.setPuntuacion(-1);
+
+			entityManager.persist(p);
 			entityManager.persist(art);
 			entityManager.persist(user);
-			entityManager.flush();
 		}
 		return "redirect:/articulo/" + art.getId();
 	}
 
 	@RequestMapping(value = "/articulo/{id}/puntuarN", method = RequestMethod.GET)
 	@Transactional
-	public String puntuarArticuloNegativoB(@PathVariable("id") long id, HttpSession session) {
+	public String puntuarArticuloNegativoB(@PathVariable("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", id);
+			return "redirect:/home";
+		}
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
-			boolean punteado = false;
-			int puntuacionId = 0;
-
-			for (int pid : art.getPuntuacionesId()) {
-				if (user.getPuntuacionesId().contains(pid)) {
-					punteado = true;
-					puntuacionId = pid;
-					break;
-				}
+			Puntuacion p;
+			try {
+				p = entityManager.createNamedQuery("puntuacionByUserAndArticle", Puntuacion.class)
+						.setParameter("userParam", user).setParameter("articuloParam", art).getSingleResult();
+			} catch (NoResultException e) {
+				// Primera vez que puntua el articulo
+				p = new Puntuacion(1, user, art);
 			}
+			p.setPuntuacion(-1);
 
-			if (punteado) {
-				user.getPuntuacionesId().remove(puntuacionId);
-				art.getPuntuacionesId().remove(puntuacionId);
-				logger.info("Articulo " + art.getId() + " puntuacion negativa retirada");
-			} else {
-				Puntuacion p = new Puntuacion(0, 1);
-				p.setUsuario(user.getId());
-
-				art.getPuntuacionesId().add((Integer) (int) p.getId());
-				art.getAutor().getPuntuacionesId().add((Integer) (int) p.getId());
-				entityManager.persist(p);
-				logger.info("Articulo " + art.getId() + " puntuado negativo");
-			}
+			entityManager.persist(p);
 			entityManager.persist(art);
 			entityManager.persist(user);
 		}
@@ -627,19 +612,24 @@ public class ArticuloController {
 	 */
 	@RequestMapping(value = "/articulo/anadirTag", params = { "idArticulo", "Tag" }, method = RequestMethod.POST)
 	@Transactional
-	public String anadirTagArticulo(@RequestParam("idArticulo") long id, @RequestParam("Tag") String tag, Model model) {
+	public String anadirTagArticulo(@RequestParam("idArticulo") long id, @RequestParam("Tag") String tag, Model model,
+			HttpServletResponse response) {
 		Tag t = entityManager.find(Tag.class, tag);
 		Articulo art = entityManager.find(Articulo.class, id);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", id);
+			return "redirect:/home";
+		}
 
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
 			if (art.getAutor().equals(user)) {
-				if (t == null) {
+				if (t == null)
 					t = Tag.newTag(Encode.forHtmlContent(tag));
-				}
-
-				t.getArticulo().add(art);
+				
+				t.getArticulos().add(art);
 				art.getTags().add(t);
 
 				entityManager.persist(t);
@@ -655,14 +645,20 @@ public class ArticuloController {
 	 */
 	@RequestMapping(value = "/articulo/eliminarTag", params = { "idArticulo", "Tag" }, method = RequestMethod.POST)
 	@Transactional
-	public String eliminarTagArticulo(@RequestParam("idArticulo") long id, @RequestParam("Tag") String tag, Model model) {
+	public String eliminarTagArticulo(@RequestParam("idArticulo") long id, @RequestParam("Tag") String tag,
+			HttpServletResponse response, Model model) {
 		Tag t = entityManager.find(Tag.class, tag);
 		Articulo art = entityManager.find(Articulo.class, id);
+		if (art == null) {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			logger.error("No such articulo: {}", id);
+			return "redirect:/home";
+		}
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
 			if (art.getAutor() == user) {
-				t.getArticulo().remove(art);
+				t.getArticulos().remove(art);
 				art.getTags().remove(t);
 
 				entityManager.persist(t);
@@ -673,46 +669,13 @@ public class ArticuloController {
 		return "redirect:/mis/articulos";
 	}
 
-	int sumaPuntuaciones(Articulo art) {
-		Iterator<Integer> itera = art.getPuntuacionesId().iterator();
-		int total = 0;
-		while (itera.hasNext()) {
-			Integer control = itera.next();
-			Number num =control;
-			Long control2=num.longValue();
-			Puntuacion pun =  entityManager.find(Puntuacion.class, control2);
-			int suma = pun.getPositivos()-pun.getNegativos();
-		 	total = total + suma;	
-		}
-		return total;
-	}
-	
-	
-
-	void ponderRanking() {
-		try {
-			List<Articulo> art = new ArrayList<Articulo>();
-			art = entityManager.createNamedQuery("allArticulos").setMaxResults(10000).getResultList();
-			Comparator<Articulo> comparador = Collections.reverseOrder();
-			Comparator<Articulo> prueba2 = new Comparator<Articulo>() {
-				public int compare(Articulo s1, Articulo s2) {
-				   Integer x = sumaPuntuaciones(s1);
-				   Integer y = sumaPuntuaciones(s2);
-				   return y.compareTo(x);
-			    }};
-			    Collections.sort(art, prueba2);
-			int ranking = 1;
-			Iterator<Articulo> itera = art.iterator();
-			while (itera.hasNext()){
-				 Articulo arp =itera.next();
-				 arp.setRanking(ranking);
-				ranking=ranking+1;
-				entityManager.persist(arp);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+	@Transactional
+	public void setRankingTop() {
+		List<Articulo> topArticulos = entityManager.createNamedQuery("topArticles").setMaxResults(100).getResultList();
+		Integer i = 0;
+		for (Articulo a : topArticulos) {
+			a.setRanking(i++);
+			entityManager.persist(a);
 		}
 	}
 }
-
-

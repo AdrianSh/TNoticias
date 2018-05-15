@@ -182,26 +182,6 @@ function choose(e) {
 	$("#selection1 .panel-body").html($(e).find("p"));
 }
 
-function showFormAddTag(e, id) {
-	e
-			.parent()
-			.html(
-					e.parent().html()
-							+ "<form method='post' action='./../articulo/anadirTag'><input type='text' name='Tag' class='btn-sm' placeholder='Tag'><input type='hidden' name='idArticulo' value='"
-							+ id
-							+ "'><input type='submit' value='Añadir Tag'><input type='submit' value='Cancelar' class='btn-sm' onclick='$(this).hide()'></form>");
-}
-function showFormDeleteTag(e, id) {
-	e
-			.parent()
-			.html(
-					e.parent().html()
-							+ "<form method='post' action='./../articulo/eliminarTag'><input type='text' name='Tag' class='btn-sm' placeholder='Tag'><input type='hidden' name='idArticulo' value='"
-							+ id
-							+ "'><input type='submit' value='Eliminar Tag'><input type='submit' value='Cancelar' class='btn-sm' onclick='$(this).hide()'></form>");
-}
-
-
 /*
  * BBcode decode :B 
  */

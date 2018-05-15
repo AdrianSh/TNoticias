@@ -13,12 +13,11 @@ import java.util.List;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "allTags", query = "select u from Tag u"),
-	@NamedQuery(name = "allTagsOrderByDate", query = "select u from Tag u order by fecha"),
-	@NamedQuery(name = "allByTag", query = "select u from Tag u where u.nombre = :tagParam")
+	@NamedQuery(name = "allTagsOrderByDate", query = "select u from Tag u order by fecha")
 })
 public class Tag {
 
-	private List<Articulo> articulo;
+	private List<Articulo> articulos;
 	private String nombre;
 	private Date fecha;
 	
@@ -26,7 +25,7 @@ public class Tag {
 	public static Tag newTag(String nombre){
 		Tag tg = new Tag();
 		tg.nombre=nombre;
-		tg.articulo = new ArrayList<Articulo>();
+		tg.articulos = new ArrayList<Articulo>();
 		tg.fecha = new Date();
 		return tg;
 	}
@@ -38,12 +37,12 @@ public class Tag {
 	
 	@ManyToMany(targetEntity=Articulo.class)
 	@JoinColumn(name="Tags") 
-	public List<Articulo> getArticulo(){
-		return articulo;
+	public List<Articulo> getArticulos(){
+		return articulos;
 	}
 	
-	public void setArticulo(List<Articulo> articulo) {
-		this.articulo = articulo;
+	public void setArticulos(List<Articulo> articulo) {
+		this.articulos = articulo;
 	}
 	
 	public void setNombre(String nombre){

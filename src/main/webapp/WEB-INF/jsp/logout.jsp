@@ -8,7 +8,7 @@
 <%@ include file="../jspf/header.jspf"%>
 
 
-<div class="starter-template">
+<div class="starter-template container">
 	<sec:authorize access="isAuthenticated()">
 	<h1>Logout</h1>
 	<p class="lead">¿Estás seguro que deseas salir?</p>

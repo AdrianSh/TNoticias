@@ -1,5 +1,6 @@
 package es.ucm.fdi.tusnoficias.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -17,19 +18,37 @@ import javax.persistence.OneToOne;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "allComentarios", query = "select u from Comentario u"),
-	 @NamedQuery(name = "allComentariosByArticulo", query = "select u from Comentario u where u.articulo = :articuloParam")})
+		@NamedQuery(name = "allComentariosByArticulo", query = "select u from Comentario u where u.articulo = :articuloParam") })
 public class Comentario {
+	@Id
+	@GeneratedValue
 	private long id;
-	private String comment; 
+	private String comment;
+
+	@ManyToOne()
 	private User owner;
+
+	@ManyToOne(targetEntity = Articulo.class)
 	private Articulo articulo;
+
+	@OneToOne(targetEntity = Comentario.class)
 	private Comentario responde;
-	private List<Integer> puntuacionesId;
+
+	@OneToMany(targetEntity = Comentario.class)
 	private List<Comentario> respuestas;
 	private Date fecha;
 
-	@Id
-	@GeneratedValue
+	@OneToMany(mappedBy = "comentario")
+	private List<PuntuacionComentario> puntuaciones;
+
+	public Comentario(User owner, Articulo art) {
+		this.puntuaciones = new ArrayList<>();
+		this.respuestas = new ArrayList<>();
+		this.owner = owner;
+		this.fecha = new Date();
+		this.articulo = art;
+	}
+	
 	public long getId() {
 		return id;
 	}
@@ -37,7 +56,7 @@ public class Comentario {
 	public void setId(long id) {
 		this.id = id;
 	}
-	
+
 	public String getComment() {
 		return comment;
 	}
@@ -45,17 +64,7 @@ public class Comentario {
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
-	
-	@ManyToOne(targetEntity=User.class)
-	public User getUser() {
-		return owner;
-	}
 
-	public void setUser(User owner) {
-		this.owner = owner;
-	}
-
-	@ManyToOne(targetEntity=Articulo.class)
 	public Articulo getArticulo() {
 		return articulo;
 	}
@@ -63,25 +72,7 @@ public class Comentario {
 	public void setArticulo(Articulo articulo) {
 		this.articulo = articulo;
 	}
-	
-	public int PuntuacionReal(){
-		int i = 0;
-		for(int l: puntuacionesId)
-			i += l;
-		return i;
-	}
-	
-	@ElementCollection
-	public List<Integer> getPuntuacionesId() {
-		//aqui consulta para encontrar puntuacion
-		return puntuacionesId;
-	}
 
-	public void setPuntuacionesId(List<Integer> puntuacionesId) {
-		this.puntuacionesId = puntuacionesId;
-		//aqui consulta para guardar puntuacion
-	}
-	@OneToMany(targetEntity=Comentario.class)
 	public List<Comentario> getRespuestas() {
 		return respuestas;
 	}
@@ -89,11 +80,11 @@ public class Comentario {
 	public void setRespuestas(List<Comentario> respuestas) {
 		this.respuestas = respuestas;
 	}
-	
-	public void anadirRespuesta(Comentario respuesta){
+
+	public void anadirRespuesta(Comentario respuesta) {
 		this.respuestas.add(respuesta);
 	}
-	@OneToOne(targetEntity=Comentario.class)
+
 	public Comentario getResponde() {
 		return responde;
 	}
@@ -108,5 +99,21 @@ public class Comentario {
 
 	public void setFecha(Date fecha) {
 		this.fecha = fecha;
+	}
+
+	public User getOwner() {
+		return owner;
+	}
+
+	public void setOwner(User owner) {
+		this.owner = owner;
+	}
+
+	public List<PuntuacionComentario> getPuntuaciones() {
+		return puntuaciones;
+	}
+
+	public void setPuntuaciones(List<PuntuacionComentario> puntuaciones) {
+		this.puntuaciones = puntuaciones;
 	}
 }

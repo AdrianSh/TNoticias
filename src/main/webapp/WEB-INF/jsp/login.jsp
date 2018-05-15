@@ -7,7 +7,7 @@
 
 <%@ include file="../jspf/header.jspf"%>
 
-<div class="starter-template">
+<div class="container">
 	<h1>Registro</h1>
 
 	<form action="/login" method="post">

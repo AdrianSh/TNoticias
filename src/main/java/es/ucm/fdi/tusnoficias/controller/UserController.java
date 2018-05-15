@@ -168,7 +168,8 @@ public class UserController {
 		try {
 			User u1 = (User) entityManager.createNamedQuery("userByLogin")
 					.setParameter("loginParam", Encode.forHtmlContent(login)).getSingleResult();
-			model.addAttribute("error", "Ese nombre de usuario ya existe '" + Encode.forHtmlContent(u1.getLogin()) +"'");
+			model.addAttribute("error",
+					"Ese nombre de usuario ya existe '" + Encode.forHtmlContent(u1.getLogin()) + "'");
 			returnn = "registro";
 		} catch (NoResultException e) {
 			returnn = "registro";
@@ -206,8 +207,7 @@ public class UserController {
 	 * Locale locale) { login(formLogin, formPass, request, response, model,
 	 * session, locale); return "redirect:admin"; }
 	 */
-	
-	
+
 	@RequestMapping(value = "/perfil", method = RequestMethod.GET)
 	@Transactional
 	public String perfil(Locale locale, Model model) {
@@ -223,12 +223,15 @@ public class UserController {
 		} else {
 			User u = this.getPrincipal().getUser();
 			System.err.println("Numero de amigos: " + u.getAmigos().size());
+			model.addAttribute("user", u);
 			model.addAttribute("amigos", u.getAmigos());
-			
+
 			model.addAttribute("comentariosPerfil", entityManager.createNamedQuery("allComentarioPerfilByUser")
 					.setParameter("userParam", u).getResultList());
 
-			// List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
+			// List<Actividad> actvs =
+			// entityManager.createNamedQuery("allActividadByUser").setParameter("userParam",
+			// u).getResultList();
 			model.addAttribute("actividad", u.getActividad());
 		}
 
@@ -268,6 +271,7 @@ public class UserController {
 			returnn = "redirect:home";
 		} else {
 			User u = this.getPrincipal().getUser();
+			model.addAttribute("user", u);
 			model.addAttribute("email", Encode.forHtmlContent(u.getEmail()));
 		}
 
@@ -282,18 +286,19 @@ public class UserController {
 		if (!ping()) {
 		} else {
 			User u = this.getPrincipal().getUser();
-			// It will load it agains
-			u = entityManager.find(User.class, u.getId());
+			model.addAttribute("user", u);
 
 			if (u != null) {
-				List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
-				
+				List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser")
+						.setParameter("userParam", u).getResultList();
+
 				Actividad atv = Actividad.createActividad(
 						"Ha agregado como amigo a " + us.getName() + " " + us.getLname(), u, new Date());
 				u.addActividad(actvs, atv);
 
-				List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", u).getResultList();
-				
+				List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", u)
+						.getResultList();
+
 				if (u.esMiAmigo(amigos, us)) {
 				} else {
 					Amigos ami = Amigos.createAmistad(u, us);
@@ -303,7 +308,7 @@ public class UserController {
 					// entityManager.persist(ami);
 					// entityManager.persist(atv);
 					entityManager.persist(u);
-					
+
 				}
 			}
 		}
@@ -319,21 +324,19 @@ public class UserController {
 
 		} else {
 			User u = this.getPrincipal().getUser();
-			u = entityManager.find(User.class, u.getId());
-			if (u != null) {
-				List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
-				
-				Actividad atv = Actividad.createActividad("Ha comentado el perfil de "
-						+ Encode.forHtmlContent(us.getName()) + " " + Encode.forHtmlContent(us.getLname()), u,
-						new Date());
-				u.addActividad(actvs, atv);
-				ComentarioPerfil comp = ComentarioPerfil.createComment(comentario, u, us, new Date());
-				u.getComentariosPerfil().add(comp);
+			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u)
+					.getResultList();
 
-				// entityManager.persist(atv);
-				// entityManager.persist(comp);
-				entityManager.persist(u);
-			}
+			Actividad atv = Actividad.createActividad("Ha comentado el perfil de " + Encode.forHtmlContent(us.getName())
+					+ " " + Encode.forHtmlContent(us.getLname()), u, new Date());
+			u.addActividad(actvs, atv);
+			ComentarioPerfil comp = ComentarioPerfil.createComment(comentario, u, us, new Date());
+			u.getComentariosPerfil().add(comp);
+			model.addAttribute("user", u);
+			// entityManager.persist(atv);
+			// entityManager.persist(comp);
+			entityManager.persist(u);
+
 		}
 		return "redirect:/user/" + us.getId();
 
@@ -356,7 +359,8 @@ public class UserController {
 			returnn = "redirect:/";
 		} else {
 			model.addAttribute("userp", us);
-			model.addAttribute("amigos", entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", us).setMaxResults(1000).getResultList());
+			model.addAttribute("amigos", entityManager.createNamedQuery("allAmigosByUserName")
+					.setParameter("userParam", us).setMaxResults(1000).getResultList());
 
 			if (!ping()) {
 				returnn = "redirect:/";
@@ -365,8 +369,9 @@ public class UserController {
 
 				if (u != null) {
 					@SuppressWarnings("unchecked")
-					List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
-					
+					List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser")
+							.setParameter("userParam", u).getResultList();
+
 					Actividad atv = Actividad.createActividad("Ha visitado el perfil de "
 							+ Encode.forHtmlContent(us.getName()) + " " + Encode.forHtmlContent(us.getLname()), u,
 							new Date());
@@ -375,9 +380,9 @@ public class UserController {
 					// this.entityManager.persist(atv);
 					this.entityManager.persist(u);
 
-					
-					List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", u).getResultList();
-					
+					List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName")
+							.setParameter("userParam", u).getResultList();
+
 					if (Amigos.comprobarAmigo(amigos, us)) {
 						// Son amigos
 						// logger.info("Son amigos:" + u.getEmail() + " de " +

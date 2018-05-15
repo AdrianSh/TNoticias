@@ -12,7 +12,7 @@
 						<input type="hidden" name="${_csrf.parameterName}"
 							value="${_csrf.token}" />
 						<div class="col-md-10">
-
+							<input type="text" name="tag" placeholder="tag"/>
 							<div class="form-group">
 								<button type="submit" class="btn btn-default">Cargar</button>
 								</label>

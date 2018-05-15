@@ -11,7 +11,7 @@
 							class="fecha">${e:forHtmlContent(articulo.fecha)}</span>
 					</header>
 					<c:if test="${not empty user}">
-					<header class="opciones">
+					<header class="opciones dropdown">
 						<a
 							href="${siteUrl}/articulo/borrar/${e:forHtmlContent(articulo.id)}">
 							<span class="glyphicon glyphicon-remove"></span>
@@ -30,13 +30,35 @@
 								</a>
 							</c:otherwise>
 						</c:choose>
+						
 						<a
-							onclick="showFormAddTag($(this), ${e:forHtmlContent(articulo.id)})">
-							<span class="glyphicon glyphicon-pushpin"></span>
-						</a> <a
-							onclick="showFormDeleteTag($(this), ${e:forHtmlContent(articulo.id)})">
-							<span class="glyphicon glyphicon-scissors"></span>
-						</a>
+											onclick="$('#addTagForm').show()">
+											<span class="glyphicon glyphicon-pushpin"></span>
+										</a>
+										<a
+											onclick="$('#removeTagForm').show()">
+											<span class="glyphicon glyphicon-scissors"></span>
+										</a>
+										
+										<form method='post' id="addTagForm" class="dropdown-menu" style="display: none;" action='./../articulo/anadirTag'>
+										<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
+										<input type='hidden' name='idArticulo' value='${e:forHtmlContent(articulo.id)}'>
+										<input type='submit' value='Añadir Tag'>
+										<input type="hidden" name="${_csrf.parameterName}"
+														value="${_csrf.token}" />
+										<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
+										
+										</form>
+										
+										<form method='post' id="removeTagForm" class="dropdown-menu" style="display: none;" action='./../articulo/eliminarTag'>
+										<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
+										<input type='hidden' name='idArticulo' value='${e:forHtmlContent(articulo.id)}'>
+										<input type='submit' value='Eliminar Tag'>
+										<input type="hidden" name="${_csrf.parameterName}"
+														value="${_csrf.token}" />
+										<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
+										
+										</form>
 
 					</header>
 					</c:if>

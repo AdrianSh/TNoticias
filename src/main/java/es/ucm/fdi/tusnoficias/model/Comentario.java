@@ -18,7 +18,7 @@ import javax.persistence.OneToOne;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "allComentarios", query = "select u from Comentario u"),
-		@NamedQuery(name = "allComentariosByArticulo", query = "select u from Comentario u where u.articulo = :articuloParam") })
+		@NamedQuery(name = "allComentariosByArticulo", query = "select u from Comentario u where u.articulo = :articuloParam and u.responde is null") })
 public class Comentario {
 	@Id
 	@GeneratedValue
@@ -41,6 +41,9 @@ public class Comentario {
 	@OneToMany(mappedBy = "comentario")
 	private List<PuntuacionComentario> puntuaciones;
 
+	public Comentario() {
+	}
+
 	public Comentario(User owner, Articulo art) {
 		this.puntuaciones = new ArrayList<>();
 		this.respuestas = new ArrayList<>();
@@ -48,7 +51,7 @@ public class Comentario {
 		this.fecha = new Date();
 		this.articulo = art;
 	}
-	
+
 	public long getId() {
 		return id;
 	}
@@ -115,5 +118,14 @@ public class Comentario {
 
 	public void setPuntuaciones(List<PuntuacionComentario> puntuaciones) {
 		this.puntuaciones = puntuaciones;
+	}
+	
+	public Integer getPuntuacion() {
+		Integer r = 0;
+		for(PuntuacionComentario p : this.puntuaciones) {
+			r += p.getPuntuacion();
+		}
+		
+		return r;
 	}
 }

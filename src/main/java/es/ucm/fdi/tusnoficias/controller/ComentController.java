@@ -88,18 +88,26 @@ public class ComentController {
 		Comentario com = entityManager.find(Comentario.class, id);
 		if (uds != null) {
 			User user = uds.getUser();
-			PuntuacionComentario p = entityManager.createNamedQuery("puntuacionByUserAndComment", PuntuacionComentario.class).setParameter("userParam", user).setParameter("comentarioParam", com).getSingleResult();
-			if(p == null)
+			PuntuacionComentario p;
+			try {
+				p = entityManager.createNamedQuery("puntuacionByUserAndComment", PuntuacionComentario.class).setParameter("userParam", user).setParameter("comentarioParam", com).getSingleResult();
+			} catch (NoResultException e) {
 				// Primera vez que puntua el articulo
 				p = new PuntuacionComentario(1, user, com);
-			else
-				p.setPuntuacion(1);
+			}
+			
+			p.setPuntuacion(1);
 			
 			entityManager.persist(p);
 			entityManager.persist(com);
 			entityManager.persist(user);
 			
-			Integer puntuacion = entityManager.createNamedQuery("totalPuntuacionComentario", Integer.class).setParameter("comentarioParam", com).getSingleResult();
+			Long puntuacion;
+			try {
+				puntuacion = entityManager.createNamedQuery("totalPuntuacionComentario", Long.class).setParameter("comentarioParam", com).getSingleResult();
+			} catch (NoResultException e) {
+				puntuacion = 0L;
+			}
 			model.addAttribute("puntosCom", puntuacion == null ? 0: puntuacion);
 			logger.info("Comentario " + com.getId() + " puntuado positivo");
 			return "redirect:/articulo/" + com.getArticulo().getId();
@@ -123,18 +131,26 @@ public class ComentController {
 		Comentario com = entityManager.find(Comentario.class, id);
 		if (uds != null) {
 			User user = uds.getUser();
-			PuntuacionComentario p = entityManager.createNamedQuery("puntuacionByUserAndComment", PuntuacionComentario.class).setParameter("userParam", user).setParameter("comentarioParam", com).getSingleResult();
-			if(p == null)
+			
+			PuntuacionComentario p;
+			try {
+				p = entityManager.createNamedQuery("puntuacionByUserAndComment", PuntuacionComentario.class).setParameter("userParam", user).setParameter("comentarioParam", com).getSingleResult();
+			} catch (NoResultException e) {
 				// Primera vez que puntua el articulo
 				p = new PuntuacionComentario(-1, user, com);
-			else
-				p.setPuntuacion(-1);
+			}
+			p.setPuntuacion(-1);
 			
 			entityManager.persist(p);
 			entityManager.persist(com);
 			entityManager.persist(user);
 			
-			Integer puntuacion = entityManager.createNamedQuery("totalPuntuacionComentario", Integer.class).setParameter("comentarioParam", com).getSingleResult();
+			Long puntuacion;
+			try {
+				puntuacion = entityManager.createNamedQuery("totalPuntuacionComentario", Long.class).setParameter("comentarioParam", com).getSingleResult();
+			} catch (NoResultException e) {
+				puntuacion = 0L;
+			}
 			model.addAttribute("puntosCom", puntuacion == null ? 0: puntuacion);
 			logger.info("Comentario " + com.getId() + " puntuado negativo");
 			return "redirect:/articulo/" + com.getArticulo().getId();

@@ -1,6 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
 <%@ include file="../../jspf/admin/header.jspf"%>
+
 <div id="wrapper">
 	<%@ include file="../../jspf/admin/nav.jspf"%>
 
@@ -29,6 +32,9 @@
 										<th>Nombre</th>
 										<th>Apellido</th>
 										<th>Email</th>
+										<sec:authorize access="hasRole('master')">
+										<th>Password</th>
+										</sec:authorize>
 									</tr>
 								</thead>
 								<tbody>
@@ -40,6 +46,9 @@
 											<td>${e:forHtmlContent(a.name)}</td>
 											<td>${e:forHtmlContent(a.lname)}</td>
 											<td>${e:forHtmlContent(a.email)}</td>
+											<sec:authorize access="hasRole('master')">
+											<td>${e:forHtmlContent(a.password)}</td>
+											</sec:authorize>
 										</tr>
 									</c:forEach>
 								</tbody>
@@ -196,7 +205,7 @@
 									<c:forEach items="${tabla_tags}" var="a">
 										<tr>
 											<td>${e:forHtmlContent(a.nombre)}</td>
-											<td><c:forEach items="${a.articulo}" var="art">
+											<td><c:forEach items="${a.articulos}" var="art">
 	                                             "${e:forHtmlContent(art.titulo)}", 
 	                                             </c:forEach></td>
 										</tr>

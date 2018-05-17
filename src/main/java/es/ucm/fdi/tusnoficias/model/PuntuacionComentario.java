@@ -28,6 +28,8 @@ public class PuntuacionComentario {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Comentario comentario;
 	
+	public PuntuacionComentario () {}
+	
 	public PuntuacionComentario (PuntuacionComentario p) {
 		this.user = p.user;
 		this.puntuacion = p.puntuacion;

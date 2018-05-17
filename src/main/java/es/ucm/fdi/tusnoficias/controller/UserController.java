@@ -191,7 +191,8 @@ public class UserController {
 				entityManager.persist(user);
 
 				logger.info("User registered {} with password hash {}", user.getLogin(), user.getPassword());
-
+				
+				model.addAttribute("alert", "Te has registrado correctamente, ¿A que esperas? ¡Logeate!");
 				// sets the anti-csrf token
 				getTokenForSession(session);
 			}

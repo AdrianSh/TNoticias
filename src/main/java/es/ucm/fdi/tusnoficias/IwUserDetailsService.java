@@ -1,5 +1,7 @@
 package es.ucm.fdi.tusnoficias;
 
+import static org.assertj.core.api.Assertions.contentOf;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -37,7 +39,7 @@ public class IwUserDetailsService implements UserDetailsService {
 	        User u = entityManager.createQuery("from User where login = :login", User.class)
 	                            .setParameter("login", username)
 	                            .getSingleResult();
-	        
+	        log.warn("loadUserByUsername('" + username + "'): " + (u!= null ? u.getLogin() : ""));
 	        return new es.ucm.fdi.tusnoficias.UserDetails(u);
 	    } catch (Exception e) {
     		log.info("No such user: " + username);

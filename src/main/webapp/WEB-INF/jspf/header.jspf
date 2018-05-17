@@ -54,7 +54,7 @@ link
 								aria-haspopup="true" aria-expanded="false">${e:forHtmlContent(user.login)}<span
 									class="caret"></span></a>
 								<ul class="dropdown-menu" aria-labelledby="drop3">
-									<sec:authorize access="hasRole('ADMIN')">
+									<sec:authorize access="hasRole('admin')">
 										<li><a href="${siteUrl}/admin">HK</a></li>
 									</sec:authorize>
 
@@ -142,4 +142,10 @@ link
 	<c:if test="${not empty error}">
 		<section class='error'>
 			<span onclick="$('.error').hide()" class="close">X</span>${e:forHtmlContent(error)}</section>
+	</c:if>
+	
+	<!--  Success -->
+	<c:if test="${not empty alert}">
+		<section class='alert'>
+			<span onclick="$('.alert').hide()" class="close">X</span>${e:forHtmlContent(alert)}</section>
 	</c:if>

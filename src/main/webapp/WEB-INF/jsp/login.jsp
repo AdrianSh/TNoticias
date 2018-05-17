@@ -10,7 +10,7 @@
 <div class="container">
 	<h1>Registro</h1>
 
-	<form action="/login" method="post">
+	<form action="../login" method="post">
 		<fieldset>
 			<legend>Please Login</legend>
 			<label for="username">Username</label> <input type="text"

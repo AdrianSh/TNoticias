@@ -73,6 +73,7 @@ public class ArticuloController {
 
 		if (UserController.ping()) {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
 			logger.info("Article ripp public by {}", u.getLogin());
 
 			model.addAttribute("periodicos",
@@ -192,7 +193,7 @@ public class ArticuloController {
 		}
 
 		if (UserController.ping())
-			model.addAttribute("user", true);
+			model.addAttribute("user", UserController.getInstance().getPrincipal().getUser());
 
 		return "articulos/bytag";
 	}
@@ -214,7 +215,7 @@ public class ArticuloController {
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
-			u = (User) entityManager.find(User.class, u.getId());
+			model.addAttribute("user", u);
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 		} else {
 			model.addAttribute("pageTitle", "Articulo nuevo");
@@ -259,6 +260,7 @@ public class ArticuloController {
 					articulos.remove(i);
 
 			model.addAttribute("articulos", articulos);
+			model.addAttribute("user", u);
 		} else
 			returnn = "redirect:/";
 

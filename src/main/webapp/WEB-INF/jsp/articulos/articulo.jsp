@@ -141,7 +141,7 @@
 								<div class="col-sm-2 right">
 									<div class="thumbnail">
 										<img class="img-responsive user-photo"
-											src="${siteUrl}/user/${coment.user.id}/photo">
+											src="${siteUrl}/user/${coment.owner.id}/photo">
 									</div>
 									<!-- /thumbnail -->
 								</div>
@@ -149,8 +149,8 @@
 								<div class="col-sm-8 right">
 									<div class="panel panel-default">
 										<div class="panel-heading comentario-heading">
-											<strong>${e:forHtmlContent(coment.user.name)}
-												${e:forHtmlContent(coment.user.lname)}</strong> <span
+											<strong>${e:forHtmlContent(coment.owner.name)}
+												${e:forHtmlContent(coment.owner.lname)}</strong> <span
 												class="text-muted"> ${e:forHtmlContent(coment.fecha)}</span>
 										</div>
 										<div class="panel-body comentario-body">${e:forHtmlContent(coment.comment)}</div>
@@ -173,7 +173,7 @@
 														name="id">
 												</form>
 											</section>
-											<div class="puntuacionReal">${e:forHtmlContent(puntosCom)}</div>
+											<div class="puntuacionReal">${e:forHtmlContent(coment.getPuntuacion())}</div>
 
 											<section class="responderc">
 												<a
@@ -207,7 +207,7 @@
 										<div class="col-sm-2 right">
 											<div class="thumbnail">
 												<img class="img-responsive user-photo"
-													src="${siteUrl}/user/${respuesta.user.id}/photo">
+													src="${siteUrl}/user/${respuesta.owner.id}/photo">
 											</div>
 											<!-- /thumbnail -->
 										</div>
@@ -215,8 +215,8 @@
 										<div class="col-sm-8 right">
 											<div class="panel panel-default">
 												<div class="panel-heading comentario-heading">
-													<strong class="respuesta">${e:forHtmlContent(respuesta.user.name)}
-														${e:forHtmlContent(respuesta.user.lname)}</strong> <span
+													<strong class="respuesta">${e:forHtmlContent(respuesta.owner.name)}
+														${e:forHtmlContent(respuesta.owner.lname)}</strong> <span
 														class="text-muted">
 														${e:forHtmlContent(respuesta.fecha)}</span>
 												</div>

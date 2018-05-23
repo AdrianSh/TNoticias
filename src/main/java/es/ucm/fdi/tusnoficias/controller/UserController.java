@@ -298,6 +298,7 @@ public class UserController {
 			model.addAttribute("user", u);
 
 			if (u != null) {
+				@SuppressWarnings("unchecked")
 				List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser")
 						.setParameter("userParam", u).getResultList();
 
@@ -305,6 +306,7 @@ public class UserController {
 						"Ha agregado como amigo a " + us.getName() + " " + us.getLname(), u, new Date());
 				u.addActividad(actvs, atv);
 
+				@SuppressWarnings("unchecked")
 				List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName").setParameter("userParam", u)
 						.getResultList();
 
@@ -333,6 +335,7 @@ public class UserController {
 
 		} else {
 			User u = this.getPrincipal().getUser();
+			@SuppressWarnings("unchecked")
 			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u)
 					.getResultList();
 
@@ -389,6 +392,7 @@ public class UserController {
 					// this.entityManager.persist(atv);
 					this.entityManager.persist(u);
 
+					@SuppressWarnings("unchecked")
 					List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName")
 							.setParameter("userParam", u).getResultList();
 

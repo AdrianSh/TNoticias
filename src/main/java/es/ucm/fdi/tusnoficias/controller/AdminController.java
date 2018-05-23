@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.Principal;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,8 +15,6 @@ import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,9 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -43,7 +38,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import es.ucm.fdi.tusnoticias.extra.ArticleRipper;
 import es.ucm.fdi.tusnoficias.LocalData;
-import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.*;
 
 @Controller
@@ -82,8 +76,10 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
 			logger.info("Administration loaded by {}", u.getLogin());
 			Actividad atv = Actividad.createActividad("Ha entrado a la administración", u, new Date());
+			@SuppressWarnings("unchecked")
 			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
 			u.addActividad(actvs, atv);
 			model.addAttribute("mensajes",
@@ -107,6 +103,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -124,6 +121,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -138,11 +136,11 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
-
+			model.addAttribute("user", u);
+			
 			Tag nTag = new Tag();
 			nTag.setArticulos(new ArrayList<Articulo>());
 			nTag.setNombre(tag);
-
 			entityManager.persist(nTag);
 
 			logger.info("Tag added {}", nTag.getNombre());
@@ -161,7 +159,8 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
-
+			model.addAttribute("user", u);
+			
 			Periodico periodico = new Periodico();
 			periodico.setNombre(nombre);
 			periodico.setUrl(url);
@@ -184,6 +183,8 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
+			
 			logger.info("Administration loaded by {}", u.getLogin());
 			model.addAttribute("mensajes",
 					entityManager.createNamedQuery("allMensajesByUser").setParameter("userParam", u).getResultList());
@@ -214,6 +215,7 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
 			logger.info("Ripper articles interface Opened by {}", u.getLogin());
 			model.addAttribute("periodicos",
 					entityManager.createNamedQuery("allPeriodicos").setMaxResults(10000).getResultList());
@@ -237,27 +239,13 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
 			logger.info("Article ripp public by {}", u.getLogin());
 
 			model.addAttribute("periodicos",
 					entityManager.createNamedQuery("allPeriodicos").setMaxResults(10000).getResultList());
 
-			List<String> contenido = new ArrayList<String>();
-			String[] arrayS = articulo.split("\\r?\\n");
 			String[] arrayTags = tags.split(",");
-
-			for (String s : arrayS) {
-				if (s.length() > 50) {
-					String[] subss = s.split("a");
-					for (String subs : subss)
-						contenido.add('a' + subs);
-				} else {
-					contenido.add(s);
-				}
-			}
-
-			if (contenido.isEmpty())
-				contenido.add(articulo);
 
 			Set<Tag> nTags = new HashSet<>();
 			nTags.add(Tag.newTag("administrativo"));
@@ -270,7 +258,7 @@ public class AdminController {
 					nTags.add(Tag.newTag(tg));
 			}
 
-			Articulo article = Articulo.crearArticuloAdministrativo(u, contenido, titulo, nTags);
+			Articulo article = Articulo.crearArticuloAdministrativo(u, articulo, titulo, nTags);
 			
 			for (Tag tagf : nTags) {
 				tagf.getArticulos().add(article);
@@ -278,8 +266,10 @@ public class AdminController {
 			}
 			entityManager.persist(article);
 			
+			
 			Actividad atv = Actividad.createActividad(
 					"Ha publicado un articulo administrativo titulado:" + '"' + titulo + '"', u, new Date());
+			@SuppressWarnings("unchecked")
 			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u).getResultList();
 			u.addActividad(actvs, atv);
 			entityManager.persist(u);
@@ -302,6 +292,7 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
 			logger.info("Article ripp load by {}", u.getLogin());
 			model.addAttribute("periodicos",
 					entityManager.createNamedQuery("allPeriodicos").setMaxResults(10000).getResultList());
@@ -363,6 +354,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -379,6 +371,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -395,6 +388,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -411,6 +405,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -427,6 +422,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -443,6 +439,7 @@ public class AdminController {
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
 			logger.info("Administration loaded by {}", u.getLogin());
+			model.addAttribute("user", u);
 		}
 
 		return returnn;
@@ -458,6 +455,7 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -474,6 +472,7 @@ public class AdminController {
 			returnn = "redirect:/admin/login";
 		} else {
 			User u = UserController.getInstance().getPrincipal().getUser();
+			model.addAttribute("user", u);
 			logger.info("Administration loaded by {}", u.getLogin());
 		}
 
@@ -482,10 +481,8 @@ public class AdminController {
 
 	@RequestMapping(value = "/admin/login", method = RequestMethod.GET)
 	public String adminlogin(Locale locale, Model model) {
-		String returnn = "admin_login";
-		model.addAttribute("pageTitle", "Login");
-		model.addAttribute("prefix", "./../");
-
+		String returnn = "redirect:/login";
+		
 		if (UserController.isAdmin())
 			returnn = "redirect:/admin";
 
@@ -494,7 +491,7 @@ public class AdminController {
 
 	/**
 	 * Delete a user; return JSON indicating success or failure
-	 */
+	 
 	@RequestMapping(value = "/delUser", method = RequestMethod.POST)
 	@ResponseBody
 	@Transactional // needed to allow DB change
@@ -508,6 +505,7 @@ public class AdminController {
 			return new ResponseEntity<String>("Error: no such user", HttpStatus.BAD_REQUEST);
 		}
 	}
+	*/
 
 	@ResponseBody
 	@RequestMapping(value = "/articulo/{id}/image", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)

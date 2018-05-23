@@ -1,9 +1,6 @@
 package es.ucm.fdi.tusnoficias.model;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;

@@ -11,11 +11,11 @@
 					<!-- http://lorempixel.com/850/280/people/9/ -->
 				</div>
 				<div class="useravatar">
-					<img alt="" src="${siteUrl}/user/${user.id}/photo">
+					<img alt="" src="${siteUrl}/user/${userp.id}/photo">
 				</div>
 				<div class="card-info">
 					<span class="card-title">${e:forHtmlContent(userp.name)} ${e:forHtmlContent(userp.lname)}</span>
-					<c:if test="${amistad}">
+					<c:if test="${not empty amistad}">
 						<a href="${siteUrl}/perfil/${e:forHtmlContent(userp.id)}/add">Añadir como Amigo</a>
 					</c:if>
 				</div>
@@ -54,7 +54,7 @@
 						<h3>This is tab 2</h3>
 					</div>
 					<div class="tab-pane fade in" id="tab3">
-						<c:forEach items="${actividad}" var="a">
+						<c:forEach items="${userp.actividad}" var="a">
 							<p>${e:forHtmlContent(a.estado)} ${e:forHtmlContent(a.updatedAt)}</p>
 						</c:forEach>
 					</div>

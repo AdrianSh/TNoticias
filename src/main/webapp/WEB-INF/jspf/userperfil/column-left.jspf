@@ -16,7 +16,7 @@
 		<section>
 			<div class="col-xs-2 col-sm-2 imagen">
 				<div class="thumbnail">
-					<img class="img-responsive user-photo" src="${e:forUri(a.amigo.avatar)}">
+					<img class="img-responsive user-photo" src="${siteUrl}/user/${a.amigo.id}/photo">
 				</div>
 				<!-- /thumbnail -->
 			</div>

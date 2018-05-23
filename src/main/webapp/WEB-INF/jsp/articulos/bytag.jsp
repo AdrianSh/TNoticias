@@ -13,7 +13,7 @@
 						<section class="col-md-5 articulo">
 							<header>${e:forHtmlContent(ars.titulo)}</header>
 							<section>
-								<c:forEach items="${ars.contenido}" var="arss">${e:forHtmlContent(arss)}</c:forEach>
+								<c:forEach items="${ars.contenido}" var="arss">${e:forHtmlContent(arsss)}</c:forEach>
 								Autor: ${e:forHtmlContent(ars.autor.name)}
 								${e:forHtmlContent(ars.autor.lname)}
 							</section>
@@ -26,7 +26,7 @@
 				</c:otherwise>
 			</c:choose>
 		</section>
-		<c:if test="${user}">
+		<c:if test="${not empty user}">
 			<span onclick="changeseleccionActiva()">Seleccionar parrafo</span>
 			<form method="post" action="${siteUrl}/articulo/nuevo/publicar">
 				<input type="hidden" name="${_csrf.parameterName}"

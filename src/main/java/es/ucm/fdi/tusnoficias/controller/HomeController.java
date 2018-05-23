@@ -6,10 +6,6 @@ import java.util.Locale;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.servlet.http.HttpSession;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
@@ -24,9 +20,6 @@ import es.ucm.fdi.tusnoficias.UserDetails;
 
 @Controller
 public class HomeController {
-
-	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-
 	@PersistenceContext
 	private EntityManager entityManager;
 

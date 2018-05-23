@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -15,7 +14,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import org.owasp.encoder.Encode;
-import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = "allUsers", query = "select u from User u"),
@@ -239,6 +237,7 @@ public class User {
 		this.amigos = amigos;
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	public boolean esMiAmigo(List<Amigos> amigos, User us) {
 		return amigos.contains(us);
 	}

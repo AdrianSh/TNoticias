@@ -23,6 +23,7 @@
   -- Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
 -->
 <link href="${s}/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC" rel="stylesheet">
 
 <!-- Bootstrap-theme tus noticias -->
 <link rel="stylesheet" href="${s}/css/bootstrap-theme.min.css">

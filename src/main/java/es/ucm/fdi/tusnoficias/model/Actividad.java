@@ -1,6 +1,8 @@
 package es.ucm.fdi.tusnoficias.model;
 
 import java.util.Date;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -12,14 +14,19 @@ import javax.persistence.NamedQuery;
 @NamedQueries({ @NamedQuery(name = "allActividadByUser", query = "select a from Actividad a where a.user = :userParam"),
 	@NamedQuery(name = "allActividad", query = "select a from Actividad a")})
 public class Actividad {
+	@Id
+	@GeneratedValue
 	private long id;
+	
+	@Column(columnDefinition="CLOB")
 	private String estado;
+	
+	@ManyToOne(targetEntity=User.class)
 	private User user;
 	private Date createdAt;
 	private Date updatedAt;
 
-	@Id
-	@GeneratedValue
+	
 	public long getId() {
 		return id;
 	}
@@ -44,7 +51,7 @@ public class Actividad {
 		this.estado = estado;
 	}
 	
-	@ManyToOne(targetEntity=User.class)
+	
 	public User getUser(){
 		return user;
 	}

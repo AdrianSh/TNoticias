@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.ElementCollection;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -28,9 +28,13 @@ public class Articulo {
 	@Id
 	@GeneratedValue
 	private long id;
+	
+	@Column(columnDefinition="CLOB")
 	private String titulo;
-	@ElementCollection
-	private List<String> contenido;
+	
+	@Column(columnDefinition="CLOB")
+	private String contenido;
+	
 	@ManyToOne(targetEntity = User.class)
 	private User autor;
 
@@ -46,7 +50,7 @@ public class Articulo {
 	private ArticuloTipo tipo;
 	private String image = "http://lorempixel.com/200/300/";
 
-	public static Articulo crearArticuloAdministrativo(User autor, List<String> contenido, String titulo,
+	public static Articulo crearArticuloAdministrativo(User autor, String contenido, String titulo,
 			Set<Tag> tags) {
 		Articulo art = new Articulo();
 		art.autor = autor;
@@ -61,8 +65,9 @@ public class Articulo {
 
 		return art;
 	}
+	
 
-	public static Articulo crearArticuloNormal(User autor, List<String> contenido, String titulo, Set<Tag> tags) {
+	public static Articulo crearArticuloNormal(User autor, String contenido, String titulo, Set<Tag> tags) {
 		Articulo art = new Articulo();
 		art.autor = autor;
 		art.comentario = new HashSet<>();
@@ -77,6 +82,14 @@ public class Articulo {
 		return art;
 	}
 
+	public String getContenido() {
+		return contenido;
+	}
+
+	public void setContenido(String contenido) {
+		this.contenido = contenido;
+	}
+	
 	public long getId() {
 		return id;
 	}
@@ -93,13 +106,7 @@ public class Articulo {
 		this.titulo = titulo;
 	}
 
-	public List<String> getContenido() {
-		return contenido;
-	}
 
-	public void setContenido(List<String> contenido) {
-		this.contenido = contenido;
-	}
 
 	public User getAutor() {
 		return autor;

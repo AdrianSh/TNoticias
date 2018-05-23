@@ -90,7 +90,7 @@
 					</table>
 				</c:if>
 
-				<c:if test="${articulo != null}">
+				<c:if test="${not empty articulo}">
 					<div class="panel panel-info">
 						<div class="panel-heading">Articulo descargado</div>
 						<div class="panel-body">

@@ -1,42 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-<h1>Iw-Base</h1>
+	<h1>Tus noticias</h1>
 
-Este es un leeme.html de ejemplo, pensado para que lo modifiques para tu proyecto. Cambia el encabezado (h1), y lista los integrantes de tu grupo, y en general actualízalo para hacerlo tuyo.
 
-<h2>Integrantes</h2>
+	<h2>Integrantes</h2>
+	<ul>
+		<li>Adrian Estiben Sanchez Hurtado</li>
+		<!--  <li>Juan Contreras Saiz</li>
+		<li>David Quesada López</li>
+		<li>Mateo García Fuentes</li> -->
+	</ul>
 
-<ul>
-    <li>Adrian Estiben Sanchez Hurtado</li>
-</ul>
+	<h2>Proyecto</h2>
 
-<h2>Proyecto</h2>
+	Web para compartir artículos e interactuar con los lectores.
 
-Copia y pega aquí el texto de la última versión de proyecto.
+	<h2>Comentarios al profesor</h2>
 
-<h2>Comentarios al profesor</h2>
+	<ul>
+		<li>La vista de perfil de usuarios aun esta por completar las
+			columnas laterales y posibles futuros campos.</li>
+		<li>Las vistas de la Hosekeeping faltan por editar, solamente se
+			ha aplicado la plantilla y algunas de sus paginas que se mantienen
+			para su posterior desarrollo.</li>
+		<li>Se ha agregado Spring Security para la autenticacion de
+			usuarios.</li>
+		<li>Se ha agregado una forma mas eficiente de manejar las
+			puntuaciones de artículos y comentarios.</li>
+		<li>Se ha usado Github para la actualizaci&oacute;n del proyecto:
+			<a href="https://github.com/AdrianSh/iw-base">https://github.com/AdrianSh/iw-base</a>
+		</li>
+		<li>Usuario administrador 'admin' con contraseña: '123abc'.</li>
+		<li>No se han implementado tests.</li>
 
-Este es el único sitio de tu entrega en el que debes poner comentarios "al profesor" (en otros sitios, se trataría de comentarios "al desarrollador" o "al cliente"). ¡Aprovecha"
+	</ul>
 
-<h2>Vistas</h2>
+	<h2>Vistas</h2>
+	<ul>
+		<li><a href="http://localhost:8080/home">Inicio</a> - Página
+			principal estructurada en 3 columnas que contienen las categorías,
+			los últimos artículos y el top de artículos.</li>
+		<li><a href="http://localhost:8080/articulo/nuevo">Artículo
+				nuevo</a> - Publicaci&oacute;n de nuevos artículos</li>
+		<li><a href="http://localhost:8080/mis/articulos">Mis
+				Artículos</a> - Artículos publicados por el usuario loggeado</li>
+		<li><a href="http://localhost:8080/articulos/ranking">Ranking</a>
+			- Ranking de artículos</li>
+		<li><a href="http://localhost:8080/about">Sobre</a> - Información
+			muy breve del lema de la aplicación</li>
+		<li><a href="http://localhost:8080/registro">Registro</a> -
+			Formulario de registro de usuarios</li>
+		<li><a href="http://localhost:8080/olvidopass">Recuperar
+				contraseña</a> - Página de recuperación de contraseña</li>
+		<li><a href="http://localhost:8080/articulo/1">Articulo [1]</a> -
+			Primer artículo publicado</li>
+		<li><a href="http://localhost:8080/perfil">Perfil</a> - Perfil
+			del usuario loggeado</li>
+		<li><a href="http://localhost:8080/perfil/1">Perfil [1]</a> -
+			Perfil del usuario</li>
+		<li><a href="http://localhost:8080/ajustes">Ajustes</a> - Página
+			de ajustes de la cuenta de usuario</li>
+		<li><a href="http://localhost:8080/logout">Logout</a> -
+			Confirmaci&oacute;n de cierre de sesi&oacute;n</li>
+		<li><a href="http://localhost:8080/admin">HK Inicio</a> - Página
+			de inicio de la administraci&oacute;n [Sin terminar]</li>
+		<li><a href="http://localhost:8080/admin/tables">HK Tablas</a> -
+			Resumen de los artículos, categorias, tags y usuarios</li>
+		<li><a href="http://localhost:8080/admin/forms">HK Publicar</a> -
+			Ripper de articulos de periodicos externos</li>
+	</ul>
+	<h2>Recursos</h2>
+	Esto es un listado de todos los recursos externos utilizados (es decir:
+	no escritos por los desarrolladors ni incluidos en la plantilla del
+	profesor).
 
-Detalla aquí tus vistas. Usa enlaces a localhost:8080/ (SIN nombre de proyecto; correspondientes a arrancar la aplicación en modo spring-boot desde STS) para enlazar cada vista.
-<ul>
-    <li><a href="localhost:8080/">vista principal</a> - descripción muy corta de la vista
-</ul>
+	<ul>
+		<li><a
+			href="http://blog.getbootstrap.com/2015/06/15/bootstrap-3-3-5-released/"
+			target="_new">Bootstrap v3.3.5</a> <a
+			href="https://github.com/twbs/bootstrap/blob/master/LICENSE"
+			target="_new">(MIT)</a> | Html, Css, Js Framework para el desarrollo
+			web responsive.</li>
+		<li><a
+			href="https://github.com/IronSummitMedia/startbootstrap-sb-admin-2/"
+			target="_new">SB Admin 2 - Bootstrap Template</a> <a
+			href="https://github.com/IronSummitMedia/startbootstrap-sb-admin-2/blob/gh-pages/LICENSE"
+			target="_new">(Apache License 2.0)</a> | Template de Bootstrap usado
+			en la HK (Administraci&oacute;n)</li>
+		<li><a href="https://labs.abeautifulsite.net/jquery-dropdown/"
+			target="_new">jQuery Bootstrap-style Dropdowns</a> <a
+			href="https://github.com/twbs/bootstrap/blob/master/LICENSE"
+			target="_new">(MIT)</a> | Plugin de jQuery, Bootstrap para los
+			dropdowns</li>
+		<li><a href="https://esimakin.github.io/twbs-pagination/"
+			target="_new">jQuery Pagination plugin</a> <a
+			href="http://www.apache.org/licenses/LICENSE-2.0" target="_new">(Apache
+				License 2.0)</a> | Plugin de jQuery, Bootstrap que facilita la
+			paginaci&oacute;n</li>
+		<li><a href="https://code.jquery.com/jquery/" target="_new">jQuery
+				v1.11.3</a> (<a href="https://jquery.org/license/" target="_new">MIT/Apache</a>)
+			| Librería js para simplificar la aplicación de comportamientos</li>
+		<li><a
+			href="http://bootsnipp.com/snippets/featured/people-card-with-tabs"
+			target="_new">"People card with Tabs" Bootstrap 3.3.0</a> (<a
+			href="https://bootsnipp.com/onigetoc" target="_new">Onigetoc</a>) |
+			Diseño de Box aplicado a los perfiles de usuario</li>
 
-<h2>Recursos</h2>
+		<li><a href="http://hsqldb.org/">HSQL</a> (<a
+			href="http://hsqldb.org/web/hsqlLicense.html" target="_new">Based
+				on BSD License</a>) | Base de datos embebida</li>
+		<li><a href="https://github.com/jhy/jsoup/" target="_new">jSOAP</a>
+			(<a href="https://jsoup.org/license" target="_new">MIT</a>) | Java
+			HTML Parser</li>
 
-Esto es un listado de todos los recursos externos utilizados (es decir: no escritos por los desarrolladors ni incluidos en la plantilla del profesor).
 
-<ul>
-    <li><a href="localhost:8080/spring.jpg">imagen de primavera</a> (<a href="https://en.wikipedia.org/wiki/Spring_(season)#/media/File:Camino_entre_el_bosque_de_cerezos_en_flor.jpg">
-            CC-BY-SA</a>) - usada para logotipo
-    <li><a href="https://code.jquery.com/jquery-3.1.1.min.js">JQuery</a> (<a href="https://jquery.org/license/">MIT/Apache</a>) - librería js para simplificar la aplicación de comportamientos		
-</ul>
+		<li><a href="https://www.owasp.org/index.php/Main_Page"
+			target="_new">OWASP</a> (Open Source) | Proyecto para la seguridad
+			web</li>
+		<li><a href="http://jboss-javassist.github.io/javassist/"
+			target="_new">Javassist</a> <a
+			href="http://jboss-javassist.github.io/javassist/" target="_new">(MPL,
+				the LGPL, and the Apache License)</a> | Manejo mas simple de Bytecodes</li>
+
+
+
+		<li><a href="https://github.com/manuel-freire/iw-base">Proyecto
+				base para IW 2017-18</a> (<a
+			href="https://github.com/manuel-freire/iw-base/blob/master/LICENSE">Apache
+				License 2.0</a>) | Proyecto base</li>
+
+
+
+
+	</ul>
 </body>
 </html>

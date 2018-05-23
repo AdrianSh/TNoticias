@@ -1,10 +1,8 @@
 package es.ucm.fdi.tusnoficias.controller;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -13,8 +11,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +27,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.*;
-
-import java.util.Collections;
-import java.util.Comparator;
 
 @Controller
 public class ArticuloController {
@@ -79,16 +72,7 @@ public class ArticuloController {
 			model.addAttribute("periodicos",
 					entityManager.createNamedQuery("allPeriodicos").setMaxResults(10000).getResultList());
 
-			List<String> contenido = new ArrayList<String>();
-
-			String[] arrayS = Encode.forHtmlContent(articulo).split("\\r?\\n");
 			String[] arrayTags = Encode.forHtmlContent(tags).split(",");
-
-			for (String s : arrayS)
-				contenido.add(s);
-
-			if (contenido.isEmpty())
-				contenido.add(Encode.forHtmlContent(articulo));
 
 			Set<Tag> nTags = new HashSet<>();
 
@@ -101,7 +85,7 @@ public class ArticuloController {
 				}
 			}
 
-			Articulo article = Articulo.crearArticuloNormal(u, contenido, Encode.forHtmlContent(titulo), nTags);
+			Articulo article = Articulo.crearArticuloNormal(u, Encode.forHtmlContent(articulo), Encode.forHtmlContent(titulo), nTags);
 
 			for (Tag tagf : nTags) {
 				tagf.getArticulos().add(article);
@@ -111,6 +95,7 @@ public class ArticuloController {
 			Actividad atv = Actividad.createActividad(
 					"Ha publicado un articulo normal titulado:" + '"' + Encode.forHtmlContent(titulo) + '"', u,
 					new Date());
+			@SuppressWarnings("unchecked")
 			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u)
 					.getResultList();
 
@@ -168,6 +153,7 @@ public class ArticuloController {
 					logger.debug("No hay puntuaciones de " + u.getLogin() + " para el articulo " + art.getId());
 				}
 			}
+			
 		}
 		return "articulos/articulo";
 	}
@@ -282,7 +268,7 @@ public class ArticuloController {
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
-			u = (User) entityManager.find(User.class, u.getId());
+			u = entityManager.find(User.class, u.getId());
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 
 			model.addAttribute("lastarticulos", entityManager.createNamedQuery("allArticulosByAutor")
@@ -312,7 +298,7 @@ public class ArticuloController {
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
-			u = (User) entityManager.find(User.class, u.getId());
+			u = entityManager.find(User.class, u.getId());
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 
 			model.addAttribute("lastarticulos",
@@ -350,7 +336,7 @@ public class ArticuloController {
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
-			u = (User) entityManager.find(User.class, u.getId());
+			u = entityManager.find(User.class, u.getId());
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 
 			model.addAttribute("lastarticulos", u.getFavoritos());
@@ -673,6 +659,7 @@ public class ArticuloController {
 
 	@Transactional
 	public void setRankingTop() {
+		@SuppressWarnings("unchecked")
 		List<Articulo> topArticulos = entityManager.createNamedQuery("topArticles").setMaxResults(100).getResultList();
 		Integer i = 0;
 		for (Articulo a : topArticulos) {

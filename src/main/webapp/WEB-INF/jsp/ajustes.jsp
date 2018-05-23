@@ -14,7 +14,7 @@
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 							<div class="form-group">
-								<input type="file" name="avatar" id="avatar"
+								<input type="file" name="avatar" id="avatar" accept="image/*"
 									class="form-control input-lg label_better" placeholder="Ruta"
 									tabindex="1">
 
@@ -35,8 +35,17 @@
 							</div>
 						</div>
 					</div>
-					<input type="hidden" name="${_csrf.parameterName}"
-														value="${_csrf.token}" />
+					
+					<div class="row">
+						<div class="col-xs-12 col-sm-6 col-md-12">
+							<div class="form-group">
+								<input type="password" name="oldpass" id="oldpassword"
+									class="form-control input-lg label_better"
+									placeholder="Contraseña actual" required tabindex="3">
+							</div>
+						</div>
+					</div>
+					
 					<div class="row">
 						<div class="col-xs-12 col-md-3"></div>
 						<div class="col-xs-12 col-md-6">

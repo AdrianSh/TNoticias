@@ -29,7 +29,7 @@ public class User {
 	private long id;
 	private String login;
 	private String roles; // split by , to separate roles
-	private boolean enabled;
+	private boolean enabled = true;
 	private String password;
 	private String name;
 	private String lname;
@@ -79,6 +79,7 @@ public class User {
 		u.comentariosPerfil = new ArrayList<>();
 		u.puntuaciones = new ArrayList<>();
 		u.puntuacionesComentarios = new ArrayList<>();
+		u.enabled = true;
 		return u;
 	}
 

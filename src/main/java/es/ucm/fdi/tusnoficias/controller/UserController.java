@@ -108,7 +108,7 @@ public class UserController {
 	@RequestMapping(value = "/ajustes", method = RequestMethod.POST)
 	@Transactional
 	public String handleFileAjustes(@RequestParam("avatar") MultipartFile avatar, @RequestParam("email") String email,
-			@RequestParam("pass") String pass, Model model) {
+			@RequestParam("pass") String newPassword, @RequestParam("oldpass") String oldPassword, Model model) {
 
 		String returnn = "redirect:/perfil";
 
@@ -116,6 +116,12 @@ public class UserController {
 		User u = uds.getUser();
 		Long id = u.getId();
 
+		if(!passwordEncoder.matches(oldPassword, uds.getPassword())) {
+			model.addAttribute("error", "Esa no es tu antigua contraseña.");
+			model.addAttribute("user", u);
+			return "ajustes";
+		}
+			
 		if (!avatar.isEmpty()) {
 			try {
 				byte[] bytes = avatar.getBytes();
@@ -137,16 +143,19 @@ public class UserController {
 			model.addAttribute("email", Encode.forHtmlContent(email));
 		}
 
-		if (!pass.isEmpty())
-			u.setPassword(passwordEncoder.encode(pass));
-
+		if (!newPassword.isEmpty()) {
+			if(newPassword == null || newPassword.length() < 4)
+				model.addAttribute("error", "La contraseña debe tener al menos 4 caracteres");
+			else
+				u.setPassword(passwordEncoder.encode(newPassword));
+		}
 		model.addAttribute("user", u);
 		entityManager.persist(u);
 
 		this.reloadPrincipal();
 		return returnn;
 	}
-
+	
 	/**
 	 * Crear un usuario
 	 */
@@ -185,11 +194,11 @@ public class UserController {
 						"Verifique todos los campos y recuerde que el usuario y la contraseña deben tener al menos 4 caracteres.");
 				returnn = "registro";
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			} else {
+			} else {				
 				User user = User.createUser(login, passwordEncoder.encode(pass), "user", nombre, apellido, email,
 						pregunta, respuesta);
 				entityManager.persist(user);
-
+				
 				logger.info("User registered {} with password hash {}", user.getLogin(), user.getPassword());
 				
 				model.addAttribute("alert", "Te has registrado correctamente, ¿A que esperas? ¡Logeate!");
@@ -223,7 +232,6 @@ public class UserController {
 			returnn = "redirect:home";
 		} else {
 			User u = this.getPrincipal().getUser();
-			System.err.println("Numero de amigos: " + u.getAmigos().size());
 			model.addAttribute("user", u);
 			model.addAttribute("amigos", u.getAmigos());
 

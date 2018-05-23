@@ -59,7 +59,7 @@
 							<div class="form-group">
 								<input type="password" name="pass" id="password"
 									class="form-control input-lg label_better"
-									placeholder="Contraseña" tabindex="5">
+									placeholder="Contraseña" tabindex="7">
 							</div>
 						</div>
 						<div class="col-xs-12 col-sm-6 col-md-6">
@@ -67,7 +67,7 @@
 								<input type="password" name="passConf"
 									id="password_confirmation"
 									class="form-control input-lg label_better"
-									placeholder="Repita su contraseña" tabindex="6">
+									placeholder="Repita su contraseña" tabindex="8">
 							</div>
 						</div>
 					</div>
@@ -84,7 +84,7 @@
 						<div class="col-xs-12 col-md-3"></div>
 						<div class="col-xs-12 col-md-6">
 							<input type="submit" value="Registrarme"
-								class="btn btn-primary btn-block btn-lg" tabindex="7">
+								class="btn btn-primary btn-block btn-lg" tabindex="9">
 						</div>
 
 					</div>

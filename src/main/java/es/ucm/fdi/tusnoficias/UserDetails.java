@@ -3,9 +3,6 @@ package es.ucm.fdi.tusnoficias;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.apache.log4j.Logger;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,7 +24,6 @@ public class UserDetails implements org.springframework.security.core.userdetail
         	roles.add(new SimpleGrantedAuthority("ROLE_" + r));
 	        log.info("Roles for " + user.getLogin() + " include " + roles.get(roles.size()-1));
         }
-        
 	}
 	
 	public void setUser(User user) {

@@ -1,7 +1,5 @@
 package es.ucm.fdi.tusnoficias;
 
-import static org.assertj.core.api.Assertions.contentOf;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -11,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import es.ucm.fdi.tusnoficias.controller.UserController;
 import es.ucm.fdi.tusnoficias.model.User;
 
 public class IwUserDetailsService implements UserDetailsService {

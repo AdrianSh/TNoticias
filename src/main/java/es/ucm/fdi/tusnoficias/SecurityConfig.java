@@ -2,10 +2,16 @@ package es.ucm.fdi.tusnoficias;
 
 import java.io.File;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,8 +22,32 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
+	/*
+	@Value("${spring.queries.users-query}")
+	private String usersQuery;
+
+	@Value("${spring.queries.roles-query}")
+	private String rolesQuery;
+	
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		// auth.jdbcAuthentication().
+		
+		/*
+		 * auth.
+			jdbcAuthentication()
+				.usersByUsernameQuery(usersQuery)
+				.authoritiesByUsernameQuery(rolesQuery)
+				.dataSource(dataSource)
+				.passwordEncoder(bCryptPasswordEncoder);
+		 
+		auth.jdbcAuthentication().dataSource(dataSource).passwordEncoder(passwordEncoder);
+	}
+	*/
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
+		
 		http.authorizeRequests()
         		.antMatchers("/static/**", "/logout", "/403", "/**").permitAll()
 				.mvcMatchers("/admin").hasRole("ADMIN")
@@ -54,16 +84,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 */
 	
-	@Autowired
-	private Environment env;
-	
-	@Bean
-	public PasswordEncoder getPasswordEncoder() {
+	@Bean(name="passwordEncoder")
+	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 	
+	@Value("${es.ucm.fdi.base-path}")
+	private String basePath;
+	
     @Bean(name="localData")
     public LocalData getLocalData() {
-    	return new LocalData(new File(env.getProperty("es.ucm.fdi.base-path")));
+    	return new LocalData(new File(basePath));
     }    
 }

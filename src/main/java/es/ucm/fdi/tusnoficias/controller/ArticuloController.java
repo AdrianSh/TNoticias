@@ -1,5 +1,10 @@
 package es.ucm.fdi.tusnoficias.controller;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -10,12 +15,16 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -24,11 +33,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import es.ucm.fdi.tusnoficias.LocalData;
+import es.ucm.fdi.tusnoficias.Messages;
 import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.*;
 
 @Controller
+@RequestMapping("/articulo")
 public class ArticuloController {
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
@@ -38,31 +51,41 @@ public class ArticuloController {
 	@Autowired
 	private Environment env;
 
+	@Autowired
+	private LocalData localData;
+
+	@Autowired
+	Messages messages;
+
 	@ModelAttribute
-	public void addAttributes(Model model, Locale locale) {
+	@Transactional
+	public void addAttributes(Model model, Locale locale, HttpServletRequest httpServletRequest) {
 		model.addAttribute("s", "/static");
 		model.addAttribute("siteUrl", env.getProperty("es.ucm.fdi.tusnoticias.site-url"));
 		model.addAttribute("siteName", env.getProperty("es.ucm.fdi.tusnoticias.site-name"));
 		model.addAttribute("shortSiteName", env.getProperty("es.ucm.fdi.tusnoticias.short-site-name"));
+		model.addAttribute("pageTitle", httpServletRequest.getRequestURI());
+		model.addAttribute("defaultPageTitle", "Artículo");
 
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
 		String formattedDate = dateFormat.format(new Date());
 
 		model.addAttribute("serverTime", formattedDate);
+
+		// Articles
+		model.addAttribute("categorias",
+				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
+		setRankingTop(); // Reload 100 top
+		model.addAttribute("rightArticulos",
+				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
+		model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 	}
 
-	@RequestMapping(value = "/articulo/nuevo/publicar", method = RequestMethod.POST)
+	@RequestMapping(value = "/nuevo/publicar", method = RequestMethod.POST)
 	@Transactional
 	public String adminRipPublicar(@RequestParam("articulo") String articulo, @RequestParam("tags") String tags,
 			@RequestParam("titulo") String titulo, Locale locale, Model model) {
 		String returnn = "articulos/nuevo";
-
-		model.addAttribute("prefix", "../");
-		model.addAttribute("pageTitle", "Articulo");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		if (UserController.ping()) {
 			User u = UserController.getInstance().getPrincipal().getUser();
@@ -78,14 +101,15 @@ public class ArticuloController {
 
 			for (String tg : arrayTags) {
 				Tag tLoaded = entityManager.find(Tag.class, tg);
-				if(tLoaded != null)
+				if (tLoaded != null)
 					nTags.add(tLoaded);
 				else {
 					nTags.add(Tag.newTag(tg));
 				}
 			}
 
-			Articulo article = Articulo.crearArticuloNormal(u, Encode.forHtmlContent(articulo), Encode.forHtmlContent(titulo), nTags);
+			Articulo article = Articulo.crearArticuloNormal(u, Encode.forHtmlContent(articulo),
+					Encode.forHtmlContent(titulo), nTags);
 
 			for (Tag tagf : nTags) {
 				tagf.getArticulos().add(article);
@@ -113,19 +137,9 @@ public class ArticuloController {
 		return returnn;
 	}
 
-	@RequestMapping(value = { "/articulo/{id}", "/articulo/mostrar/{id}" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/{id}", "/mostrar/{id}" }, method = RequestMethod.GET)
 	@Transactional
 	public String articulo(@PathVariable("id") long id, HttpServletResponse response, Model model, Locale locale) {
-		model.addAttribute("prefix", "../");
-		model.addAttribute("pageTitle", "Articulo");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-
-		// Reload 100 top
-		setRankingTop();
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-
 		Articulo art = entityManager.find(Articulo.class, id);
 		if (art == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -153,22 +167,15 @@ public class ArticuloController {
 					logger.debug("No hay puntuaciones de " + u.getLogin() + " para el articulo " + art.getId());
 				}
 			}
-			
+
 		}
 		return "articulos/articulo";
 	}
 
-	@RequestMapping(value = { "/articulo/tag/{tag}", "/articulos/tag/{tag}" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/tag/{tag}", "/tag/{tag}" }, method = RequestMethod.GET)
 	@Transactional
 	public String articulosbytag(@PathVariable("tag") String tagName, HttpServletResponse response, Model model,
 			Locale locale) {
-		model.addAttribute("prefix", "./");
-		model.addAttribute("pageTitle", "Articulo");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		Tag tag = entityManager.find(Tag.class, Encode.forHtmlContent(tagName));
 		if (tag == null) {
@@ -184,19 +191,10 @@ public class ArticuloController {
 		return "articulos/bytag";
 	}
 
-	@RequestMapping(value = { "/articulo/nuevo", "/articulo/new" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/nuevo", "/new" }, method = RequestMethod.GET)
 	@Transactional
 	public String nuevoArticulo(HttpServletResponse response, Model model, Locale locale) {
 		String returnn = "articulos/nuevo";
-		model.addAttribute("prefix", "../");
-		model.addAttribute("pageTitle", "Articulo nuevo");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-
-		// Reload 100 top
-		setRankingTop();
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
@@ -204,10 +202,6 @@ public class ArticuloController {
 			model.addAttribute("user", u);
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 		} else {
-			model.addAttribute("pageTitle", "Articulo nuevo");
-			model.addAttribute("categorias",
-					entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-			model.addAttribute("prefix", "../");
 			model.addAttribute("mMensaje", "Debes estar registrado para poder publicar un articulo.");
 			returnn = "noregistro";
 		}
@@ -215,20 +209,11 @@ public class ArticuloController {
 		return returnn;
 	}
 
-	@RequestMapping(value = { "/articulo/nuevo/articulos", "/articulo/new" }, method = RequestMethod.POST)
+	@RequestMapping(value = { "/nuevo/articulos", "/new" }, method = RequestMethod.POST)
 	@Transactional
 	public String nuevoArticuloLoadArticulos(@RequestParam("tag") String tag, HttpServletResponse response, Model model,
 			Locale locale) {
 		String returnn = "articulos/nuevo";
-		model.addAttribute("prefix", "../../");
-		model.addAttribute("pageTitle", "Articulo nuevo");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-
-		// Reload 100 top
-		setRankingTop();
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
@@ -236,7 +221,7 @@ public class ArticuloController {
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 
 			Tag tg = entityManager.find(Tag.class, tag);
-			if(tg == null)
+			if (tg == null)
 				return returnn;
 			List<Articulo> articulos = tg.getArticulos();
 			// Falta implementar que los articulos que le son pasados al
@@ -253,17 +238,10 @@ public class ArticuloController {
 		return returnn;
 	}
 
-	@RequestMapping(value = { "/articulos", "/mis/articulos" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/articulos" }, method = RequestMethod.GET)
 	@Transactional
 	public String misArticulos(HttpServletResponse response, Model model, Locale locale) {
 		String returnn = "articulos/articulos";
-		model.addAttribute("prefix", "../");
-		// model.addAttribute("pageTitle", "Articulo nuevo");
-		model.addAttribute("pageTitle", "Mis articulos");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
@@ -281,76 +259,40 @@ public class ArticuloController {
 		return returnn;
 	}
 
-	@RequestMapping(value = { "/articulos/ranking" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/ranking" }, method = RequestMethod.GET)
 	@Transactional
 	public String rankingArt(HttpServletResponse response, Model model, Locale locale) {
 		String returnn = "articulos/articulos";
-		model.addAttribute("prefix", "../");
-		model.addAttribute("pageTitle", "Ranking");
-
-		// Reload 100 top
-		setRankingTop();
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
 			u = entityManager.find(User.class, u.getId());
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
-
 			model.addAttribute("lastarticulos",
 					entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10000).getResultList());
 			model.addAttribute("user", u);
 		} else {
-			model.addAttribute("pageTitle", "Articulo nuevo");
-			model.addAttribute("categorias",
-					entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-			model.addAttribute("rightArticulos",
-					entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-			model.addAttribute("prefix", "../");
-
 			model.addAttribute("mMensaje", "Debes estar registrado para poder ver el ranking.");
-
 			returnn = "noregistro";
 		}
 		return returnn;
 	}
 
-	@RequestMapping(value = { "/articulos/favoritos", "/mis/articulosfavoritos" }, method = RequestMethod.GET)
+	@RequestMapping(value = { "/favoritos" }, method = RequestMethod.GET)
 	@Transactional
 	public String misArticulosFav(HttpServletResponse response, Model model, Locale locale) {
 		String returnn = "articulos/articulos";
-		model.addAttribute("prefix", "../");
-		model.addAttribute("pageTitle", "Articulos favoritos");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-
-		// Reload 100 top
-		setRankingTop();
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User u = uds.getUser();
 			u = entityManager.find(User.class, u.getId());
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
-
 			model.addAttribute("lastarticulos", u.getFavoritos());
 			model.addAttribute("user", u);
 		} else {
-			model.addAttribute("pageTitle", "Articulos favoritos");
-			model.addAttribute("categorias",
-					entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-			model.addAttribute("rightArticulos",
-					entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-			model.addAttribute("prefix", "../");
-
 			model.addAttribute("mMensaje", "Debes estar registrado para poder ver tus articulos favoritos.");
-
 			returnn = "noregistro";
 		}
 		return returnn;
@@ -360,11 +302,11 @@ public class ArticuloController {
 	 * Borra un articulo
 	 */
 
-	@RequestMapping(value = "/articulo/borrar/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/borrar/{id}", method = RequestMethod.GET)
 	@Transactional
 	public String borrarArticulo(@PathVariable("id") long id, HttpServletResponse response, Model model,
 			Locale locale) {
-		String returnn = "redirect:/articulos";
+		String returnn = "redirect:/articulo/articulos";
 
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		Articulo art = entityManager.find(Articulo.class, id);
@@ -395,22 +337,15 @@ public class ArticuloController {
 					returnn = "redirect:/home";
 				}
 
-				returnn = "redirect:/mis/articulos";
+				returnn = "redirect:/articulo/articulos";
 			} catch (NoResultException nre) {
 				logger.error("No existe tal articulo: {}", id, nre);
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-				returnn = "redirect:/articulos";
+				returnn = "redirect:/articulo/articulos";
 			}
 		} else {
-			model.addAttribute("pageTitle", "Articulo nuevo");
-			model.addAttribute("categorias",
-					entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-			model.addAttribute("rightArticulos",
-					entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-			model.addAttribute("prefix", "../../");
 			model.addAttribute("mMensaje",
 					"Debes estar registrado y ser el dueño de dicho articulo, para poder borrarlo.");
-
 			returnn = "noregistro";
 		}
 		return returnn;
@@ -419,7 +354,7 @@ public class ArticuloController {
 	/**
 	 * Añadir articulo a favoritos
 	 */
-	@RequestMapping(value = "/articulo/favorito", method = RequestMethod.POST)
+	@RequestMapping(value = "/favorito", method = RequestMethod.POST)
 	@Transactional
 	public String anadirArticuloFavorito(@RequestParam("idArticulo") long idArticulo, Model model,
 			HttpServletResponse response) {
@@ -442,7 +377,7 @@ public class ArticuloController {
 		return "redirect:/articulo/" + art.getId();
 	}
 
-	@RequestMapping(value = "/articulo/{id}/favorito", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id}/favorito", method = RequestMethod.GET)
 	@Transactional
 	public String anadirArticuloFavoritoById(@PathVariable("id") long idArticulo, Model model,
 			HttpServletResponse response) {
@@ -473,7 +408,7 @@ public class ArticuloController {
 	 * Puntuar articulo positivo
 	 */
 
-	@RequestMapping(value = "/articulo/puntuarP", params = { "id" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/puntuarP", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
 	public String puntuarArticuloPositivo(@RequestParam("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
@@ -503,7 +438,7 @@ public class ArticuloController {
 		return "redirect:/articulo/" + art.getId();
 	}
 
-	@RequestMapping(value = "/articulo/{id}/puntuarP", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id}/puntuarP", method = RequestMethod.GET)
 	@Transactional
 	public String puntuarArticuloPositivob(@PathVariable("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
@@ -536,7 +471,7 @@ public class ArticuloController {
 	 * Puntuar articulo negativo
 	 */
 
-	@RequestMapping(value = "/articulo/puntuarN", params = { "id" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/puntuarN", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
 	public String puntuarArticuloNegativo(@RequestParam("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
@@ -566,7 +501,7 @@ public class ArticuloController {
 		return "redirect:/articulo/" + art.getId();
 	}
 
-	@RequestMapping(value = "/articulo/{id}/puntuarN", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id}/puntuarN", method = RequestMethod.GET)
 	@Transactional
 	public String puntuarArticuloNegativoB(@PathVariable("id") long id, HttpServletResponse response) {
 		Articulo art = entityManager.find(Articulo.class, id);
@@ -598,7 +533,7 @@ public class ArticuloController {
 	/**
 	 * Añadir tag a un articulo
 	 */
-	@RequestMapping(value = "/articulo/anadirTag", params = { "idArticulo", "Tag" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/anadirTag", params = { "idArticulo", "Tag" }, method = RequestMethod.POST)
 	@Transactional
 	public String anadirTagArticulo(@RequestParam("idArticulo") long id, @RequestParam("Tag") String tag, Model model,
 			HttpServletResponse response) {
@@ -616,7 +551,7 @@ public class ArticuloController {
 			if (art.getAutor().equals(user)) {
 				if (t == null)
 					t = Tag.newTag(Encode.forHtmlContent(tag));
-				
+
 				t.getArticulos().add(art);
 				art.getTags().add(t);
 
@@ -625,13 +560,13 @@ public class ArticuloController {
 				logger.info("Tag " + t.getNombre() + " puesto a articulo " + art.getId());
 			}
 		}
-		return "redirect:/mis/articulos";
+		return "redirect:/articulo/articulos";
 	}
 
 	/**
 	 * Quitar tag de un articulo
 	 */
-	@RequestMapping(value = "/articulo/eliminarTag", params = { "idArticulo", "Tag" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/eliminarTag", params = { "idArticulo", "Tag" }, method = RequestMethod.POST)
 	@Transactional
 	public String eliminarTagArticulo(@RequestParam("idArticulo") long id, @RequestParam("Tag") String tag,
 			HttpServletResponse response, Model model) {
@@ -654,7 +589,27 @@ public class ArticuloController {
 				logger.info("Tag " + t.getNombre() + " eliminado de articulo " + art.getId());
 			}
 		}
-		return "redirect:/mis/articulos";
+		return "redirect:/articulo/articulos";
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/{id}/image", method = RequestMethod.GET, produces = MediaType.IMAGE_JPEG_VALUE)
+	public byte[] articuloPhoto(@PathVariable("id") long id) throws IOException {
+		try {
+			String st = Long.toString(id);
+			File f = localData.getFile("articulos", st);
+			InputStream in = null;
+			if (f.exists()) {
+				in = new BufferedInputStream(new FileInputStream(f));
+			} else {
+				in = new BufferedInputStream(this.getClass().getClassLoader().getResourceAsStream("unknown-user.jpg"));
+			}
+
+			return IOUtils.toByteArray(in);
+		} catch (IOException e) {
+			logger.warn("Error cargando la imagen del articulo id:  " + id, e);
+			throw e;
+		}
 	}
 
 	@Transactional

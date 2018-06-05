@@ -8,7 +8,7 @@
 	</section>
 	<div class="row">
 		<div class="col-lg-12">
-			<p>Copyright &copy; TusNoticias 2015</p>
+			<p>Copyright &copy; TusNoticias 2015-2018</p>
 		</div>
 	</div>
 </footer>
@@ -38,7 +38,7 @@
 <script type="text/javascript">
 $(".category").click(function() {
 	var tag = $(this).text();
-	$("section.col-md-7").load("${siteUrl}/articulos/tag/" + tag);
+	$("section.col-md-7").load("${siteUrl}/articulo/tag/" + tag);
 	$("a.list-group-item.category.active").toggleClass("active");
 	$(this).toggleClass("active");
 });

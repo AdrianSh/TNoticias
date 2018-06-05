@@ -14,16 +14,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="">
 <meta name="author" content="">
-
-<title>${e:forHtmlContent(shortSiteName)}-
-	${e:forHtmlContent(pageTitle)}</title>
+<title><s:message code="shortSiteName" text="TNoticias"
+		htmlEscape="true" /> | <s:message
+		code="${e:forHtmlContent(pageTitle)}"
+		text="${e:forHtmlContent(defaultPageTitle)}" htmlEscape="true" /></title>
 
 <!-- Bootstrap Core CSS 
   -- Copyright 2014-2015 Twitter, Inc.
   -- Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
 -->
 <link href="${s}/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC" rel="stylesheet">
+<link
+	href="https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC"
+	rel="stylesheet">
 
 <!-- Bootstrap-theme tus noticias -->
 <link rel="stylesheet" href="${s}/css/bootstrap-theme.min.css">
@@ -59,7 +62,7 @@ link
 										<li><a href="${siteUrl}/admin">HK</a></li>
 									</sec:authorize>
 
-									<li><a href="${siteUrl}/articulos/favoritos">Art.
+									<li><a href="${siteUrl}/articulo/favoritos">Art.
 											Favoritos</a></li>
 									<li><a href="${siteUrl}/perfil">Perfil</a></li>
 									<li><a href="${siteUrl}/ajustes">Ajustes</a></li>
@@ -85,7 +88,8 @@ link
 											value="${requestScope['javax.servlet.forward.servlet_path']}" />
 
 										<input type="text" name="username" placeholder="Usuario"></input>
-										<input type="password" name="password" placeholder="Contraseña"></input>
+										<input type="password" name="password"
+											placeholder="Contraseña"></input>
 
 										<button type="submit" value="Click">Entrar</button>
 									</form>
@@ -107,7 +111,7 @@ link
 	<nav class="navbar-1 navbar navbar-default">
 		<div class="container-fluid">
 			<div class="navhe1 navbar-header">
-				<a class="navbar-brand logo" href="#">${e:forHtmlContent(siteName)}</a>
+				<a class="navbar-brand logo" title="${e:forHtmlContent(siteName)}" href="${siteUrl}"><img alt="${e:forHtmlContent(siteName)}" src="${s}/img/logo.png"></a>
 			</div>
 		</div>
 
@@ -119,15 +123,17 @@ link
 						aria-haspopup="true" aria-expanded="false">Inicio</a></li>
 					<li class="dropdown"><a href="${siteUrl}/articulo/nuevo"
 						role="button" aria-haspopup="true" aria-expanded="false">Publicar</a></li>
-					<li class="dropdown"><a href="${siteUrl}/mis/articulos"
+					<li class="dropdown"><a href="${siteUrl}/articulo/articulos"
 						role="button" aria-haspopup="true" aria-expanded="false">Mis
 							Articulos</a></li>
-					<li class="dropdown"><a href="${siteUrl}/articulos/ranking"
+					<li class="dropdown"><a href="${siteUrl}/articulo/ranking"
 						role="button" aria-haspopup="true" aria-expanded="false">Ranking</a></li>
 					<li class="dropdown"><a href="${siteUrl}/about" role="button"
 						aria-haspopup="true" aria-expanded="false">Sobre</a></li>
 
-
+					<sec:authorize access="hasRole('admin')">
+						<li><a href="${siteUrl}/admin">HK</a></li>
+					</sec:authorize>
 					<c:if test="${empty user}">
 						<li class="dropdown"><a href="${siteUrl}/registro"
 							role="button" aria-haspopup="true" aria-expanded="false">Registro</a></li>
@@ -144,7 +150,7 @@ link
 		<section class='error'>
 			<span onclick="$('.error').hide()" class="close">X</span>${e:forHtmlContent(error)}</section>
 	</c:if>
-	
+
 	<!--  Success -->
 	<c:if test="${not empty alert}">
 		<section class='alert'>

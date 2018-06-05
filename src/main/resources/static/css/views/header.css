@@ -1,8 +1,26 @@
-@import url('https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC');
+/* @import url('https://fonts.googleapis.com/css?family=IM+Fell+French+Canon+SC');
+.logo {
+	font-family: 'IM Fell French Canon SC', monospace;
+    color: #ffffff !important;
+    float: none !important;
+    text-shadow: 0px 1px 0px #e00000, 0px 0px 105px #000000e6, 0px 2px 0px #a90000;
+    letter-spacing: 2px;
+    font-size: 6em;
+}
+*/
+.logo {
+	width: 100%;
+    height: auto;
+}
+.logo > img {
+	max-width: 50vw;
+    width: 328px;
+    margin: auto;
+}
 
 .navbar-default .navbar-collapse, .navbar-default .navbar-form {
 	background-color: rgb(255, 255, 255);
-    margin-top: 5vh;
+    /* margin-top: 5vh; */
     border-top: 1px solid #E00000;
     border-right: 1px solid #E00000;
     border-left: 1px solid #E00000;
@@ -25,14 +43,7 @@
 .navbar-default .navbar-nav>li>a:hover {
 	background: #F7EEEE;
 }
-.logo {
-	font-family: 'IM Fell French Canon SC', monospace;
-    color: #ffffff !important;
-    float: none !important;
-    text-shadow: 0px 1px 0px #e00000, 0px 0px 105px #000000e6, 0px 2px 0px #a90000;
-    letter-spacing: 2px;
-    font-size: 6em;
-}
+
 
 .navbar-1 {
 	background-color: #FFF;
@@ -50,7 +61,6 @@
 
 .navhe1 {
 	float: none !important;
-	margin-top: 5vh;
 	text-align: center;
 }
 

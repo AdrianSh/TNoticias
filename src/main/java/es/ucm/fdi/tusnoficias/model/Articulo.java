@@ -198,4 +198,14 @@ public class Articulo {
 	public void setPuntuaciones(List<Puntuacion> puntuaciones) {
 		this.puntuaciones = puntuaciones;
 	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Articulo) {
+			Articulo o = (Articulo) obj;
+			return o.id == this.id;
+		}
+		return false;
+	}
 }

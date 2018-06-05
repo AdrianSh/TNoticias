@@ -22,6 +22,7 @@ import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.*;
 
 @Controller
+@RequestMapping("/comentario")
 public class ComentController {
 
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
@@ -34,7 +35,7 @@ public class ComentController {
 	 * 
 	 * @param model
 	 */
-	@RequestMapping(value = "/comentario/anadir", params = { "comment", "id" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/anadir", params = { "comment", "id" }, method = RequestMethod.POST)
 	@Transactional
 	public String anadirComentario(@RequestParam("comment") String comment, @RequestParam("id") long idArt,
 			Model model) {
@@ -75,7 +76,7 @@ public class ComentController {
 	 * @param model
 	 */
 
-	@RequestMapping(value = "/comentario/puntuarP", params = { "id" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/puntuarP", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
 	public String puntuarComentarioPositivo(@RequestParam("id") long id, Model model) {
 		UserDetails uds = UserController.getInstance().getPrincipal();
@@ -117,7 +118,7 @@ public class ComentController {
 	 * @param model
 	 */
 
-	@RequestMapping(value = "/comentario/puntuarN", params = { "id" }, method = RequestMethod.POST)
+	@RequestMapping(value = "/puntuarN", params = { "id" }, method = RequestMethod.POST)
 	@Transactional
 	public String puntuarComentarioNegativo(@RequestParam("id") long id, Model model) {
 		
@@ -157,7 +158,7 @@ public class ComentController {
 	 * Responder comentario
 	 */
 
-	@RequestMapping(value = "/comentario/responder", params = { "comment", "articulo",
+	@RequestMapping(value = "/responder", params = { "comment", "articulo",
 			"comentario original" }, method = RequestMethod.POST)
 	@Transactional
 	public String responderComentario(@RequestParam("comment") String comment,
@@ -188,7 +189,7 @@ public class ComentController {
 	/**
 	 * Borra un comentario
 	 */
-	@RequestMapping(value = "/comentario/borrar/{id}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/borrar/{id}", method = RequestMethod.DELETE)
 	@Transactional
 	@ResponseBody
 	public String borrarComentario(@PathVariable("id") long id, HttpServletResponse response, Model model) {

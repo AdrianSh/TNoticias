@@ -42,7 +42,7 @@
 									</div>
 									<div class="form-group">
 										<label>Ingrese el identificador del contenedor</label> <input
-											class="form-control" name="identificador"
+											class="form-control" name="identificador" required
 											placeholder="Identificador">
 									</div>
 									<button type="submit" class="btn btn-default">Cargar

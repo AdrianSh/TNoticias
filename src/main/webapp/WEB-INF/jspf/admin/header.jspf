@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
 <%@ taglib
 	uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project"
 	prefix="e"%>
@@ -11,8 +12,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="">
 <meta name="author" content="">
-
-<title>${e:forHtmlContent(pageTitle)}</title>
+<title><s:message code="shortSiteName" text="TNoticias" htmlEscape="true"/> | <s:message code="${e:forHtmlContent(pageTitle)}" text="${e:forHtmlContent(defaultPageTitle)}" htmlEscape="true"/></title>
 <!-- Bootstrap Core CSS -->
 <link
 	href="${s}/admin/bower_components/bootstrap/dist/css/bootstrap.min.css"

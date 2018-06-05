@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.ucm.fdi.tusnoficias.LocalData;
+import es.ucm.fdi.tusnoficias.Messages;
 import es.ucm.fdi.tusnoficias.UserDetails;
 import es.ucm.fdi.tusnoficias.model.Actividad;
 import es.ucm.fdi.tusnoficias.model.Amigos;
@@ -67,20 +68,31 @@ public class UserController {
 	// @Autowired
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	@Autowired
+	Messages messages;
 
 	private static UserController instance;
 
 	@ModelAttribute
-	public void addAttributes(Model model, Locale locale) {
+	public void addAttributes(Model model, Locale locale, HttpServletRequest httpServletRequest) {
 		model.addAttribute("s", "/static");
 		model.addAttribute("siteUrl", env.getProperty("es.ucm.fdi.tusnoticias.site-url"));
 		model.addAttribute("siteName", env.getProperty("es.ucm.fdi.tusnoticias.site-name"));
 		model.addAttribute("shortSiteName", env.getProperty("es.ucm.fdi.tusnoticias.short-site-name"));
-
+		model.addAttribute("pageTitle", httpServletRequest.getRequestURI());
+		model.addAttribute("defaultPageTitle", ";)");
+		
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
 		String formattedDate = dateFormat.format(new Date());
 
 		model.addAttribute("serverTime", formattedDate);
+		
+		// Articulos
+		model.addAttribute("categorias",
+				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
+		model.addAttribute("rightArticulos",
+				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 	}
 
 	public UserController() {
@@ -93,16 +105,7 @@ public class UserController {
 
 	@RequestMapping(value = { "/registro", "/usuario/crear" }, method = RequestMethod.GET)
 	public String registro(Locale locale, Model model) {
-		String returnn = "registro";
-		if (ping())
-			returnn = "redirect:home";
-		model.addAttribute("pageTitle", "Registro");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-
-		return returnn;
+		return ping() ? "registro" : "redirect:home";
 	}
 
 	@RequestMapping(value = "/ajustes", method = RequestMethod.POST)
@@ -168,12 +171,6 @@ public class UserController {
 			@RequestParam("pregunta") String pregunta, Model model, @RequestParam("respuesta") String respuesta,
 			HttpServletRequest request, HttpServletResponse response, HttpSession session, Locale locale) {
 		String returnn = "redirect:/";
-
-		model.addAttribute("pageTitle", "Registro");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
 		try {
 			User u1 = (User) entityManager.createNamedQuery("userByLogin")
 					.setParameter("loginParam", Encode.forHtmlContent(login)).getSingleResult();
@@ -221,27 +218,16 @@ public class UserController {
 	@RequestMapping(value = "/perfil", method = RequestMethod.GET)
 	@Transactional
 	public String perfil(Locale locale, Model model) {
-		model.addAttribute("pageTitle", "Perfil");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-		String returnn = "perfil";
-
-		if (!ping()) {
-			returnn = "redirect:home";
-		} else {
+		String returnn = "redirect:home";
+		if (ping()){
 			User u = this.getPrincipal().getUser();
 			model.addAttribute("user", u);
 			model.addAttribute("amigos", u.getAmigos());
 
 			model.addAttribute("comentariosPerfil", entityManager.createNamedQuery("allComentarioPerfilByUser")
 					.setParameter("userParam", u).getResultList());
-
-			// List<Actividad> actvs =
-			// entityManager.createNamedQuery("allActividadByUser").setParameter("userParam",
-			// u).getResultList();
 			model.addAttribute("actividad", u.getActividad());
+			returnn = "perfil";
 		}
 
 		return returnn;
@@ -270,20 +256,13 @@ public class UserController {
 	@RequestMapping(value = "/ajustes", method = RequestMethod.GET)
 	@Transactional
 	public String ajustes(Locale locale, Model model) {
-		model.addAttribute("pageTitle", "Ajustes");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-		String returnn = "ajustes";
-		if (!ping()) {
-			returnn = "redirect:home";
-		} else {
+		String returnn = "redirect:home";
+		if (ping()) {
 			User u = this.getPrincipal().getUser();
 			model.addAttribute("user", u);
 			model.addAttribute("email", Encode.forHtmlContent(u.getEmail()));
+			returnn = "ajustes";
 		}
-
 		return returnn;
 	}
 
@@ -292,8 +271,7 @@ public class UserController {
 	public String adduserasfriend(@PathVariable("id") Long id, HttpServletResponse response, Model model,
 			Locale locale) {
 		User us = entityManager.find(User.class, id);
-		if (!ping()) {
-		} else {
+		if (ping()) {
 			User u = this.getPrincipal().getUser();
 			model.addAttribute("user", u);
 
@@ -319,7 +297,6 @@ public class UserController {
 					// entityManager.persist(ami);
 					// entityManager.persist(atv);
 					entityManager.persist(u);
-
 				}
 			}
 		}
@@ -331,9 +308,7 @@ public class UserController {
 	public String userPerfilAddComment(@RequestParam("comment") String comentario, @PathVariable("id") long id,
 			HttpServletResponse response, Model model, Locale locale) {
 		User us = entityManager.find(User.class, id);
-		if (!ping()) {
-
-		} else {
+		if (ping()) {
 			User u = this.getPrincipal().getUser();
 			@SuppressWarnings("unchecked")
 			List<Actividad> actvs = entityManager.createNamedQuery("allActividadByUser").setParameter("userParam", u)
@@ -348,7 +323,6 @@ public class UserController {
 			// entityManager.persist(atv);
 			// entityManager.persist(comp);
 			entityManager.persist(u);
-
 		}
 		return "redirect:/user/" + us.getId();
 
@@ -357,26 +331,17 @@ public class UserController {
 	@RequestMapping(value = { "/user/{id}", "/perfil/{id}" }, method = RequestMethod.GET)
 	@Transactional
 	public String userPerfil(@PathVariable("id") long id, HttpServletResponse response, Model model, Locale locale) {
-		String returnn = "userperfil";
-		model.addAttribute("pageTitle", "Perfil");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-		model.addAttribute("prefix", "./../");
+		String returnn = "redirect:/";
 		User us = entityManager.find(User.class, id);
 		if (us == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			logger.error("No such user: {}", id);
-			returnn = "redirect:/";
 		} else {
 			model.addAttribute("userp", us);
 			model.addAttribute("amigos", entityManager.createNamedQuery("allAmigosByUserName")
 					.setParameter("userParam", us).setMaxResults(1000).getResultList());
 
-			if (!ping()) {
-				returnn = "redirect:/";
-			} else {
+			if (ping()) {
 				User u = this.getPrincipal().getUser();
 
 				if (u != null) {
@@ -411,8 +376,8 @@ public class UserController {
 					logger.error("Usuario no encontrado, verifique si esta loggeado.");
 				}
 				model.addAttribute("user", u);
+				returnn = "userperfil";
 			}
-
 		}
 		return returnn;
 	}
@@ -424,43 +389,8 @@ public class UserController {
 	public String logout() {
 		return "logout";
 	}
-
-	/**
-	 * Intercepts login requests generated by the header; then continues to load
-	 * normal page
-	 *
-	 * 
-	 * @RequestMapping(value = "/login", method = RequestMethod.POST)
-	 * @Transactional public String login(@RequestParam("login") String
-	 *                formLogin, @RequestParam("pass") String formPass,
-	 *                HttpServletRequest request, HttpServletResponse response,
-	 *                RedirectAttributes model, HttpSession session, Locale locale)
-	 *                {
-	 * 
-	 *                if (formLogin == null || formLogin.length() < 4 || formPass ==
-	 *                null || formPass.length() < 4) {
-	 *                model.addAttribute("loginError", "usuarios y contraseñas: 4
-	 *                caracteres mínimo");
-	 *                response.setStatus(HttpServletResponse.SC_BAD_REQUEST); } else
-	 *                { User u = null; try { u = (User)
-	 *                entityManager.createNamedQuery("userByLogin")
-	 *                .setParameter("loginParam",
-	 *                Encode.forHtmlContent(formLogin)).getSingleResult(); if
-	 *                (u.isPassValid(formPass)) { logger.info("pass was valid");
-	 *                Actividad atv = Actividad.createActividad("Se ha conectado!",
-	 *                u, new Date());
-	 * 
-	 *                u.getActividad().add(atv); session.setAttribute("user", u); //
-	 *                sets the anti-csrf token getTokenForSession(session); } else {
-	 *                logger.info("pass was NOT valid");
-	 *                session.setAttribute("loginError", "error en usuario o
-	 *                contraseña");
-	 *                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); } }
-	 *                catch (NoResultException nre) { logger.info("no such login:
-	 *                {}", formLogin); session.setAttribute("loginError", "error en
-	 *                usuario o contraseña"); } } return "redirect:home"; }
-	 * 
-	 *                /** Uploads a photo for a user
+	
+	/** Uploads a photo for a user
 	 * 
 	 * @param id
 	 *            of user
@@ -492,17 +422,9 @@ public class UserController {
 	/**
 	 * Olvidar contraseña.
 	 */
-
 	@RequestMapping(value = { "/olvidopass", "/mail/nuevo/", "/forgot", "/olvide" }, method = RequestMethod.GET)
 	@Transactional
 	public String olvidoPassWebb(Locale locale, Model model, HttpSession session) {
-
-		model.addAttribute("pageTitle", "Recuperar contraseña");
-		model.addAttribute("categorias",
-				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
-		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
-
 		return "user/olvidopass";
 	}
 
@@ -511,7 +433,6 @@ public class UserController {
 	public String regenerarpass(@RequestParam("email") String email, @RequestParam("alias") String alias,
 			@RequestParam("respuesta") String respuesta, Locale locale, Model model, HttpSession session) {
 		String returnn = "user/enviarpass";
-		model.addAttribute("pageTitle", "Recuperar contraseña");
 		try {
 			User user = (User) getSingleResultOrNull(entityManager.createNamedQuery("userByEmail")
 					.setParameter("emailParam", Encode.forHtmlContent(email)));

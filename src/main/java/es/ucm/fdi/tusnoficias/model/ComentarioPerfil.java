@@ -81,4 +81,13 @@ public class ComentarioPerfil {
 	public void setCreatedAt(Date date){
 		this.updatedAt = this.createdAt = date;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof ComentarioPerfil) {
+			ComentarioPerfil o = (ComentarioPerfil) obj;
+			return o.id == this.id;
+		}
+		return false;
+	}
 }

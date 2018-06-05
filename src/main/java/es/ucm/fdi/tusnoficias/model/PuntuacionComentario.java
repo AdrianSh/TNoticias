@@ -64,4 +64,13 @@ public class PuntuacionComentario {
 	public void setComentario(Comentario o) {
 		this.comentario = o;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof PuntuacionComentario) {
+			PuntuacionComentario o = (PuntuacionComentario) obj;
+			return o.id == null ? o.id == this.id : o.id.equals(this.id);
+		}
+		return false;
+	}
 }

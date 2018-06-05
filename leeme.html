@@ -32,11 +32,28 @@
 		<li>Se ha agregado una forma mas eficiente de manejar las
 			puntuaciones de artículos y comentarios.</li>
 		<li>Se ha usado Github para la actualizaci&oacute;n del proyecto:
-			<a href="https://github.com/AdrianSh/iw-base">https://github.com/AdrianSh/iw-base</a>
+			<a href="https://github.com/AdrianSh/TNoticias" target="_new">https://github.com/AdrianSh/TNoticias</a>
 		</li>
 		<li>Usuario administrador 'admin' con contraseña: '123abc'.</li>
 		<li>No se han implementado tests.</li>
-
+	</ul>
+	<h4>Tras la primer revisión</h4>
+	<ul>
+		<li>Se han mantenido resources de más del template usado en la
+			página de administración para futuros usos. <span
+			style="color: gray; font-size: 12px;">(src/main/resources/static/admin)</span>
+		</li>
+		<li>Se han solucionado varias redundancias de código.</li>
+		<li>Se han agregado el uso de ajax al marcar como favorito o
+			puntuar un articulo. (Aun queda pendiente implementarlo en la
+			puntuacion de comentarios).</li>
+		<li>Se ha agregado descripcion basica de uso en la pagina
+			'Sobre'.</li>
+		<li>Se ha implementado una nueva forma de cargar los titulos en
+			las paginas.</li>
+		<li>Se agregó un botón adicional en la barra de navegación: 'HK';
+			que enlaza con la administración.</li>
+		<li>Datos de ejemplo vienen incluidos en el import.sql</li>
 	</ul>
 
 	<h2>Vistas</h2>
@@ -46,9 +63,9 @@
 			los últimos artículos y el top de artículos.</li>
 		<li><a href="http://localhost:8080/articulo/nuevo">Artículo
 				nuevo</a> - Publicaci&oacute;n de nuevos artículos</li>
-		<li><a href="http://localhost:8080/mis/articulos">Mis
+		<li><a href="http://localhost:8080/articulo/articulos">Mis
 				Artículos</a> - Artículos publicados por el usuario loggeado</li>
-		<li><a href="http://localhost:8080/articulos/ranking">Ranking</a>
+		<li><a href="http://localhost:8080/articulo/ranking">Ranking</a>
 			- Ranking de artículos</li>
 		<li><a href="http://localhost:8080/about">Sobre</a> - Información
 			muy breve del lema de la aplicación</li>

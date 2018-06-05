@@ -58,4 +58,12 @@ public class Amigos {
 		this.amigo = amigo;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Amigos) {
+			Amigos o = (Amigos) obj;
+			return o.id == this.id;
+		}
+		return false;
+	}
 }

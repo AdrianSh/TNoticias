@@ -125,4 +125,13 @@ public class Comentario {
 		
 		return r;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Comentario) {
+			Comentario o = (Comentario) obj;
+			return o.id == this.id;
+		}
+		return false;
+	}
 }

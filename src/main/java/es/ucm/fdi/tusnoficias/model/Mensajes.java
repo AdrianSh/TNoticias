@@ -70,4 +70,13 @@ public class Mensajes {
 	public void setCreatedAt(Date date){
 		this.createdAt = date;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Mensajes) {
+			Mensajes o = (Mensajes) obj;
+			return o.id == this.id;
+		}
+		return false;
+	}
 }

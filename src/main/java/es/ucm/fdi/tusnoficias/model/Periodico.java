@@ -38,4 +38,13 @@ public class Periodico {
 	public String getNombre(){
 	  	return nombre;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Periodico) {
+			Periodico o = (Periodico) obj;
+			return o.id == this.id;
+		}
+		return false;
+	}
 }

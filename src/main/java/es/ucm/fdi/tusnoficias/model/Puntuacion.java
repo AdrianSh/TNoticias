@@ -63,4 +63,13 @@ public class Puntuacion {
 	public void setArticulo(Articulo objeto) {
 		this.articulo = objeto;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Puntuacion) {
+			Puntuacion o = (Puntuacion) obj;
+			return o.id == null ? o.id == this.id : o.id.equals(this.id);
+		}
+		return false;
+	}
 }

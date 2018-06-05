@@ -75,4 +75,13 @@ public class Actividad {
 	public void setCreatedAt(Date date){
 		this.updatedAt = this.createdAt = date;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Actividad) {
+			Actividad o = (Actividad) obj;
+			return o.id == this.id;
+		}
+		return false;
+	}
 }

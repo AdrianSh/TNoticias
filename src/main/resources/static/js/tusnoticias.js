@@ -60,9 +60,9 @@ try {
 		});
 		return encontrado;
 	}
-	
+
 	function changeseleccionActiva() {
-		
+
 		if (seleccionActiva)
 			seleccionActiva = false;
 		else
@@ -183,25 +183,24 @@ function choose(e) {
 }
 
 /*
- * BBcode decode :B 
+ * BBcode decode :B
  */
-$.each(
+$
+		.each(
 				$("section"),
 				function(key, value) {
 					$str = $(this).html();
 
 					$format_search = [ /\[b\](.*?)\[\/b\]/ig,
-							/\[i\](.*?)\[\/i\]/ig,
-							/\[u\](.*?)\[\/u\]/ig,
+							/\[i\](.*?)\[\/i\]/ig, /\[u\](.*?)\[\/u\]/ig,
 							/\[s\](.*?)\[\/s\]/ig,
 							/\[center\](.*?)\[\/center\]/ig,
 							/\[sup\](.*?)\[\/sup\]/ig,
 							/\[sub\](.*?)\[\/sub\]/ig,
-							/\[list\](.*?)\[\/list\]/ig,
-							/\[*\](.*?)\[\/*\]/ig,
+							/\[list\](.*?)\[\/list\]/ig, /\[*\](.*?)\[\/*\]/ig,
 							/\[list=1\](.*?)\[\/list\]/ig,
 							/\[img\](.*?)\[\/img\]/ig,
-							/\[video\](.*?)\[\/video\]/ig,,
+							/\[video\](.*?)\[\/video\]/ig, ,
 							/\[url=(.*?)](.*?)\[\/url\]/ig,
 							/\[color=(.*?)\](.*?)\[\/color\]/ig,
 							/\[size=(.*?)\](.*?)\[\/size\]/ig,
@@ -209,12 +208,12 @@ $.each(
 							/\[right\](.*?)\[\/right\]/ig,
 							/\[quote\](.*?)\[\/quote\]/ig,
 							/\[table\](.*?)\[\/table\]/ig,
-							/\[tr\](.*?)\[\/tr\]/ig,
-							/\[td\](.*?)\[\/td\]/ig,
-							/\[thead\](.*?)\[\/thead\]/ig];
-							
-					$format_replace = [ '<strong>$1</strong>', 
-					        '<em>$1</em>',
+							/\[tr\](.*?)\[\/tr\]/ig, /\[td\](.*?)\[\/td\]/ig,
+							/\[thead\](.*?)\[\/thead\]/ig ];
+
+					$format_replace = [
+							'<strong>$1</strong>',
+							'<em>$1</em>',
 							'<span style="text-decoration: underline;">$1</span>',
 							'<strike>$1</strike>',
 							'<p style="text-align:center">$1</p>',
@@ -230,11 +229,8 @@ $.each(
 							'<font size="$1">$2</font>',
 							'<p style="text-align:left">$1</p>',
 							'<p style="text-align:right">$1</p>',
-							'<blockquote>$1</blockquote>',
-							'<table>$1</table>',
-							'<tr>$1</tr>',
-							'<td>$1</td>',
-							'<thead>$1</thead>'];
+							'<blockquote>$1</blockquote>', '<table>$1</table>',
+							'<tr>$1</tr>', '<td>$1</td>', '<thead>$1</thead>' ];
 
 					for (var i = 0; i < $format_search.length; i++) {
 						$str = $str.replace($format_search[i],
@@ -242,3 +238,61 @@ $.each(
 					}
 					$(this).html($str);
 				});
+
+
+
+var favLinks = $(".opciones a[href$='favorito']");
+var puntPLinks = $(".opciones a[href$='puntuarP']");
+var puntNLinks = $(".opciones a[href$='puntuarN']");
+
+
+favLinks.each(function(i){	
+	$(this).click(function(e){
+		e.preventDefault();
+		let ahref = e.target.parentElement.href;
+		var artId = ahref.substring(ahref.lastIndexOf("articulo") + 9, ahref.lastIndexOf("favorito") - 1);
+		var csrf = $("input[name='_csrf']")[0].value;
+		$.post( "/articulo/favorito", { idArticulo: artId, _csrf: csrf},  function(){
+			$(".opciones a[href$='articulo/" + artId + "/favorito']").each(function(i){
+				this.style.color = this.style.color == "red" ? '' : 'red';
+			});
+		});
+
+	});
+});
+
+puntPLinks.each(function(i){	
+	$(this).click(function(e){
+		e.preventDefault();
+		let ahref = e.target.parentElement.href;
+		var artId = ahref.substring(ahref.lastIndexOf("articulo") + 9, ahref.lastIndexOf("puntuarP") - 1);
+		var csrf = $("input[name='_csrf']")[0].value;
+		$.post( "/articulo/puntuarP", { id: artId, _csrf: csrf},  function(){
+			$(".opciones a[href$='articulo/" + artId + "/puntuarP']").each(function(i){
+				this.style.color = 'blue';
+				$(".opciones a[href$='articulo/" + artId + "/puntuarN']").each(function(i){
+					this.style.color = '';
+				});
+			});
+		});
+
+	});
+});
+
+puntNLinks.each(function(i){	
+	$(this).click(function(e){
+		e.preventDefault();
+		let ahref = e.target.parentElement.href;
+		var artId = ahref.substring(ahref.lastIndexOf("articulo") + 9, ahref.lastIndexOf("puntuarN") - 1);
+		var csrf = $("input[name='_csrf']")[0].value;
+		$.post( "/articulo/puntuarN", { id: artId, _csrf: csrf},  function(){
+			$(".opciones a[href$='articulo/" + artId + "/puntuarN']").each(function(i){
+				this.style.color = 'blue';
+				$(".opciones a[href$='articulo/" + artId + "/puntuarP']").each(function(i){
+					this.style.color = '';
+				});
+			});
+		});
+
+	});
+});

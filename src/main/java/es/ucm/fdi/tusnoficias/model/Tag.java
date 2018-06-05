@@ -56,5 +56,13 @@ public class Tag {
 	public Date getFecha(){
 		return fecha;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Tag) {
+			Tag o = (Tag) obj;
+			return o.nombre == null ? o.nombre == this.nombre : o.nombre.equals(this.nombre);
+		}
+		return false;
+	}
 }

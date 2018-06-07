@@ -14,6 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="">
 <meta name="author" content="">
+<link rel="shortcut icon" type="image/png" href="${s}/img/news-icon.png"/>
 <title><s:message code="shortSiteName" text="TNoticias"
 		htmlEscape="true" /> | <s:message
 		code="${e:forHtmlContent(pageTitle)}"

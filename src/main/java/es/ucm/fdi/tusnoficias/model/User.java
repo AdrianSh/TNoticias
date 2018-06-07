@@ -123,13 +123,12 @@ public class User {
 	}
 
 	public void anadirFavorito(Articulo articulo) {
-		this.favoritos.add(articulo);
+		if(!this.favoritos.contains(articulo))
+			this.favoritos.add(articulo);
 	}
 
 	public void eliminarFavorito(Articulo articulo) {
-		if (!this.favoritos.remove(articulo)) {
-
-		}
+		this.favoritos.remove(articulo);
 	}
 
 	public void seguir(User user) {

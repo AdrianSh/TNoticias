@@ -49,7 +49,7 @@ public class HomeController {
 		model.addAttribute("categorias",
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
 		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
+				entityManager.createNamedQuery("topArticles").setMaxResults(10).getResultList());
 		model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 
 	}

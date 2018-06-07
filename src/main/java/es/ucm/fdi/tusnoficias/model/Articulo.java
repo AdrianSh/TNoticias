@@ -40,7 +40,10 @@ public class Articulo {
 
 	@ManyToMany(targetEntity = Tag.class, fetch = FetchType.EAGER, mappedBy = "articulos")
 	private Set<Tag> tags;
-
+	
+	@ManyToMany(targetEntity = User.class, fetch = FetchType.LAZY, mappedBy = "favoritos")
+	private List<User> usuariosFavoritos;
+	
 	@OneToMany(mappedBy = "articulo")
 	private List<Puntuacion> puntuaciones;
 	@OneToMany(targetEntity = Comentario.class, fetch = FetchType.EAGER, mappedBy = "articulo")
@@ -106,7 +109,13 @@ public class Articulo {
 		this.titulo = titulo;
 	}
 
+	public List<User> getUsuariosFavoritos() {
+		return usuariosFavoritos;
+	}
 
+	public void setUsuariosFavoritos(List<User> usuariosFavoritos) {
+		this.usuariosFavoritos = usuariosFavoritos;
+	}
 
 	public User getAutor() {
 		return autor;

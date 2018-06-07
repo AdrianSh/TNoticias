@@ -14,24 +14,29 @@
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 							<div class="form-group">
+							<label>Foto de perfil:</label>
 								<input type="file" name="avatar" id="avatar" accept="image/*"
 									class="form-control input-lg label_better" placeholder="Ruta"
 									tabindex="1">
-
+								<small class="form-text text-muted">Max 1Mb</small>
 							</div>
 						</div>
 					</div>
 					<div class="form-group">
+					<label>Email:</label>
 						<input type="email" name="email" id="email"
 							class="form-control input-lg label_better" placeholder="${email}"
 							tabindex="2">
+							
 					</div>
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 							<div class="form-group">
+							<label>Nueva contraseña:</label>
 								<input type="password" name="pass" id="password"
 									class="form-control input-lg label_better"
 									placeholder="Contraseña" tabindex="3">
+									
 							</div>
 						</div>
 					</div>
@@ -39,9 +44,11 @@
 					<div class="row">
 						<div class="col-xs-12 col-sm-6 col-md-12">
 							<div class="form-group">
+							<label>Contraseña actual:</label>
 								<input type="password" name="oldpass" id="oldpassword"
 									class="form-control input-lg label_better"
 									placeholder="Contraseña actual" required tabindex="3">
+									
 							</div>
 						</div>
 					</div>

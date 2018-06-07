@@ -62,7 +62,7 @@
 							</div>
 						</div>
 						<div class="col-md-10">
-							<input class="btn btn-default" type="submit" value="Comentar">
+							<input class="btn btn-default" type="submit" value="Publicar">
 						</div>
 					</form>
 				</section>

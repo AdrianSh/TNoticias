@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import javax.naming.SizeLimitExceededException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -30,18 +31,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.ucm.fdi.tusnoficias.LocalData;
@@ -105,7 +111,18 @@ public class UserController {
 
 	@RequestMapping(value = { "/registro", "/usuario/crear" }, method = RequestMethod.GET)
 	public String registro(Locale locale, Model model) {
-		return ping() ? "registro" : "redirect:home";
+		return !ping() ? "registro" : "redirect:home";
+	}
+	
+	@ExceptionHandler(SizeLimitExceededException.class)
+    public String sizeLimitExceededException(SizeLimitExceededException exc) {
+        return "redirect:/perfil";
+    }
+	
+	@ExceptionHandler(MultipartException.class)
+	@ResponseStatus(value = HttpStatus.PAYLOAD_TOO_LARGE)
+	public ResponseEntity<?> handleMultipartException(MultipartException ex) {
+	    return ResponseEntity.badRequest().build();
 	}
 
 	@RequestMapping(value = "/ajustes", method = RequestMethod.POST)
@@ -205,15 +222,6 @@ public class UserController {
 		}
 		return returnn;
 	}
-	/*
-	 * @RequestMapping(value = "/adminlogin", method = RequestMethod.POST)
-	 * 
-	 * @Transactional public String adminlogin(@RequestParam("login") String
-	 * formLogin, @RequestParam("pass") String formPass, HttpServletRequest request,
-	 * HttpServletResponse response, RedirectAttributes model, HttpSession session,
-	 * Locale locale) { login(formLogin, formPass, request, response, model,
-	 * session, locale); return "redirect:admin"; }
-	 */
 
 	@RequestMapping(value = "/perfil", method = RequestMethod.GET)
 	@Transactional
@@ -320,8 +328,8 @@ public class UserController {
 			ComentarioPerfil comp = ComentarioPerfil.createComment(comentario, u, us, new Date());
 			u.getComentariosPerfil().add(comp);
 			model.addAttribute("user", u);
-			// entityManager.persist(atv);
-			// entityManager.persist(comp);
+			entityManager.persist(atv);
+			entityManager.persist(comp);
 			entityManager.persist(u);
 		}
 		return "redirect:/user/" + us.getId();
@@ -361,15 +369,10 @@ public class UserController {
 					List<Amigos> amigos = entityManager.createNamedQuery("allAmigosByUserName")
 							.setParameter("userParam", u).getResultList();
 
-					if (Amigos.comprobarAmigo(amigos, us)) {
-						// Son amigos
-						// logger.info("Son amigos:" + u.getEmail() + " de " +
-						// us.getEmail());
-						model.addAttribute("amistad", false);
-					} else {
-						// logger.info("No son amigos:" + u.getEmail() + " de "
-						// + us.getEmail());
-						// logger.info(u.getAmigos().toString());
+					model.addAttribute("comentariosPerfil", entityManager.createNamedQuery("allComentarioPerfilByUser")
+							.setParameter("userParam", us).getResultList());
+					
+					if (!Amigos.comprobarAmigo(amigos, us)) {
 						model.addAttribute("amistad", true);
 					}
 				} else {

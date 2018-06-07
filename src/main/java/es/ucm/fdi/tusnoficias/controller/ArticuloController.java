@@ -77,7 +77,7 @@ public class ArticuloController {
 				entityManager.createNamedQuery("allTagsOrderByDate").setMaxResults(10000).getResultList());
 		setRankingTop(); // Reload 100 top
 		model.addAttribute("rightArticulos",
-				entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10).getResultList());
+				entityManager.createNamedQuery("topArticles").setMaxResults(10).getResultList());
 		model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 	}
 
@@ -270,7 +270,7 @@ public class ArticuloController {
 			u = entityManager.find(User.class, u.getId());
 			model.addAttribute("tags", entityManager.createNamedQuery("allTags").getResultList());
 			model.addAttribute("lastarticulos",
-					entityManager.createNamedQuery("allArticulosOrderByRanking").setMaxResults(10000).getResultList());
+					entityManager.createNamedQuery("topArticles").setMaxResults(100).getResultList());
 			model.addAttribute("user", u);
 		} else {
 			model.addAttribute("mMensaje", "Debes estar registrado para poder ver el ranking.");
@@ -322,6 +322,9 @@ public class ArticuloController {
 
 				// Para no usar CASCADE [Perform]
 				if (art.getAutor().equals(u)) {
+					for (User us : art.getUsuariosFavoritos())
+						us.eliminarFavorito(art);
+					
 					for (Comentario com : art.getComentario())
 						entityManager.remove(com);
 
@@ -369,10 +372,15 @@ public class ArticuloController {
 		UserDetails uds = UserController.getInstance().getPrincipal();
 		if (uds != null) {
 			User user = uds.getUser();
-			user.getFavoritos().add(art);
+			List<Articulo> artFav = user.getFavoritos();
+			if(artFav.contains(art)) {
+				artFav.remove(art);
+			} else {
+				artFav.add(art);
+			}
 
 			entityManager.persist(user);
-			logger.info("Articulo " + art.getId() + " añadido a favoritos de " + user.getLogin());
+			logger.info("Articulo " + art.getId() + " añadido/quitado a favoritos de " + user.getLogin());
 		}
 		return "redirect:/articulo/" + art.getId();
 	}

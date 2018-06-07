@@ -19,7 +19,7 @@
 					<!-- /col-xs-2 col-sm-2 -->
 
 					<div class="col-xs-10 col-sm-10 panel-heading">
-						<a href="./perfil/${e:forUri(a.user.id)}"><strong>${e:forHtmlContent(a.user.name)}
+						<a href="${siteUrl}/perfil/${e:forUri(a.user.id)}"><strong>${e:forHtmlContent(a.user.name)}
 								${e:forHtmlContent(a.user.lname)}</strong></a> <span class="text-muted">${e:forHtmlContent(a.updatedAt)}</span>
 					</div>
 					<div class="col-xs-10 col-sm-10 panel-body">${e:forHtmlContent(a.comentario)}</div>

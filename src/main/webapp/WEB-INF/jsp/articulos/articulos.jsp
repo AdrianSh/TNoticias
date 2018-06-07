@@ -11,63 +11,66 @@
 							class="fecha">${e:forHtmlContent(articulo.fecha)}</span>
 					</header>
 					<c:if test="${not empty user}">
-					<header class="opciones dropdown">
-						<a
-							href="${siteUrl}/articulo/borrar/${e:forHtmlContent(articulo.id)}">
-							<span class="glyphicon glyphicon-remove"></span>
-						</a>
-						<c:choose>
-							<c:when test="${user.favoritos.contains(articulo)}">
-								<a style="color: red;"
-									href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
-									<span class="glyphicon glyphicon-heart"></span>
-								</a>
-							</c:when>
-							<c:otherwise>
+						<header class="opciones dropdown">
+							<c:if test="${ articulo.autor.login == user.login }">
 								<a
-									href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
-									<span class="glyphicon glyphicon-heart"></span>
+									href="${siteUrl}/articulo/borrar/${e:forHtmlContent(articulo.id)}">
+									<span class="glyphicon glyphicon-remove"></span>
 								</a>
-							</c:otherwise>
-						</c:choose>
-						
-						<a
-											onclick="$('#addTagForm').show()">
-											<span class="glyphicon glyphicon-pushpin"></span>
-										</a>
-										<a
-											onclick="$('#removeTagForm').show()">
-											<span class="glyphicon glyphicon-scissors"></span>
-										</a>
-										
-										<form method='post' id="addTagForm" class="dropdown-menu" style="display: none;" action='./../articulo/anadirTag'>
-										<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
-										<input type='hidden' name='idArticulo' value='${e:forHtmlContent(articulo.id)}'>
-										<input type='submit' value='Añadir Tag'>
-										<input type="hidden" name="${_csrf.parameterName}"
-														value="${_csrf.token}" />
-										<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
-										
-										</form>
-										
-										<form method='post' id="removeTagForm" class="dropdown-menu" style="display: none;" action='./../articulo/eliminarTag'>
-										<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
-										<input type='hidden' name='idArticulo' value='${e:forHtmlContent(articulo.id)}'>
-										<input type='submit' value='Eliminar Tag'>
-										<input type="hidden" name="${_csrf.parameterName}"
-														value="${_csrf.token}" />
-										<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
-										
-										</form>
+							</c:if>
+							<c:choose>
+								<c:when test="${user.favoritos.contains(articulo)}">
+									<a style="color: red;"
+										href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+										<span class="glyphicon glyphicon-heart"></span>
+									</a>
+								</c:when>
+								<c:otherwise>
+									<a
+										href="${siteUrl}/articulo/${e:forHtmlContent(articulo.id)}/favorito">
+										<span class="glyphicon glyphicon-heart"></span>
+									</a>
+								</c:otherwise>
+							</c:choose>
+							<c:if test="${ articulo.autor.login == user.login }">
+								<a onclick="$('#addTagForm').show()"> <span
+									class="glyphicon glyphicon-pushpin"></span>
+								</a>
+								<a onclick="$('#removeTagForm').show()"> <span
+									class="glyphicon glyphicon-scissors"></span>
+								</a>
 
-					</header>
+								<form method='post' id="addTagForm" class="dropdown-menu"
+									style="display: none;" action='./../articulo/anadirTag'>
+									<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
+									<input type='hidden' name='idArticulo'
+										value='${e:forHtmlContent(articulo.id)}'> <input
+										type='submit' value='Añadir Tag'> <input type="hidden"
+										name="${_csrf.parameterName}" value="${_csrf.token}" />
+									<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
+
+								</form>
+
+								<form method='post' id="removeTagForm" class="dropdown-menu"
+									style="display: none;" action='./../articulo/eliminarTag'>
+									<input type='text' name='Tag' class='btn-sm' placeholder='Tag'>
+									<input type='hidden' name='idArticulo'
+										value='${e:forHtmlContent(articulo.id)}'> <input
+										type='submit' value='Eliminar Tag'> <input
+										type="hidden" name="${_csrf.parameterName}"
+										value="${_csrf.token}" />
+									<div class='btn-sm' onclick='$(this).parent().hide()'>Cancelar</div>
+
+								</form>
+							</c:if>
+						</header>
 					</c:if>
 					<section>
 						<c:forEach items="${articulo.contenido}" var="paragraph">${e:forHtmlContent(paragraph)}</c:forEach>
 					</section>
 					<footer>
 						<div class="ranking">${e:forHtmlContent(articulo.ranking)}</div>
-						<div class="autor">${e:forHtmlContent(articulo.autor.login)}</div>
+						<div class="autor"><a href="${siteUrl}/user/${e:forHtmlContent(articulo.autor.id)}">${e:forHtmlContent(articulo.autor.login)}</a></div>
 					</footer>
 				</article>
 				<section class="separadorDeArticulo"></section>
@@ -95,13 +98,16 @@
 		</section>
 		<%@ include file="../../jspf/column-right.jspf"%>
 		<section class="col-md-10 loadMore">
-			<a class="label label-default" onclick="cargarArts()" href="#">Cargar mas articulos</a>
+			<a class="label label-default" onclick="cargarArts()" href="#">Cargar
+				mas articulos</a>
 		</section>
 	</div>
 </section>
 <!-- /.container -->
 
 <%@ include file="../../jspf/footer.jspf"%>
+
+<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 
 <script type="text/javascript">
 	var articulos = $('.articulo');
@@ -139,7 +145,7 @@
 					return false;
 				}
 			});
-			if(articulos.length > 0){
+			if (articulos.length > 0) {
 				$('.loadMore').show();
 			}
 		}

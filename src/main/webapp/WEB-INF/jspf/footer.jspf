@@ -4,7 +4,7 @@
 <footer>
 	
 	<section>		
-			<a href="./nosotros" class="nosotros">Nosotros</a>
+			<a href="${siteUrl}/nosotros" class="nosotros">Nosotros</a>
 	</section>
 	<div class="row">
 		<div class="col-lg-12">
